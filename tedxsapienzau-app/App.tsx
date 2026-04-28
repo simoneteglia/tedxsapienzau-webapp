@@ -9,9 +9,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
+  type ImageSourcePropType,
 } from 'react-native';
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type Talk = {
   id: string;
@@ -86,50 +88,153 @@ type TabKey = 'Talks' | 'Sponsors' | 'Live';
 type AppView = 'tabs' | 'talkDetail';
 const MOCK_WS_URL = 'ws://localhost:8080';
 const LYRICS_SLOT_HEIGHT = 150;
+const brand = {
+  black: '#050505',
+  white: '#ffffff',
+  ink: '#161616',
+  purple: '#a578c3',
+  green: '#88de86',
+  peach: '#ffc299',
+  pink: '#ef7fb0',
+  blue: '#7acbee',
+  yellow: '#fff4a4',
+};
+const serpentoniBackgrounds = [
+  require('./assets/serpentoni-pink-green.png'),
+  require('./assets/serpentoni-blue-yellow.png'),
+  require('./assets/serpentoni-purple-peach.png'),
+] satisfies ImageSourcePropType[];
+const serpentoniDesktopBackgrounds = [
+  require('./assets/serpentoni-desktop-pink-green.png'),
+  require('./assets/serpentoni-desktop-blue-yellow.png'),
+  require('./assets/serpentoni-desktop-purple-peach.png'),
+] satisfies ImageSourcePropType[];
 type LiveCaptionState = {
   current: string;
   previous: string | null;
   incoming: string | null;
 };
 
-function PageLayout({ children }: { children: ReactNode }) {
+function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <View style={styles.gradient}>
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={styles.sectionSubtitle}>{subtitle}</Text>
+    </View>
+  );
+}
+
+function PageLayout({
+  children,
+  backgroundSource = serpentoniBackgrounds[0],
+  desktopBackgroundSource,
+  showHeader = true,
+}: {
+  children: ReactNode;
+  backgroundSource?: ImageSourcePropType;
+  desktopBackgroundSource?: ImageSourcePropType;
+  showHeader?: boolean;
+}) {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+  const resolvedBackgroundSource = isDesktop && desktopBackgroundSource ? desktopBackgroundSource : backgroundSource;
+
+  return (
+    <View style={styles.pageSurface}>
+      <Image
+        source={resolvedBackgroundSource}
+        resizeMode="cover"
+        style={styles.pageBackgroundImage}
+      />
+      <View style={styles.pageDimmer} />
       <SafeAreaView style={styles.screenSafeArea}>
-        <View style={styles.topBrandBar}>
-          <Text style={styles.brandTed}>TEDx</Text>
-          <Text style={styles.brandName}>SapienzaU</Text>
-        </View>
+        {showHeader ? (
+          <View style={styles.topBrandBar}>
+            <View style={styles.brandLockup}>
+              <Text style={styles.brandTed}>TEDx</Text>
+              <Text style={styles.brandName}>SapienzaU</Text>
+            </View>
+            <View style={styles.miniColorPairs}>
+              <View style={[styles.colorPair, { backgroundColor: brand.green }]}>
+                <View style={[styles.colorPairDot, { backgroundColor: brand.pink }]} />
+              </View>
+              <View style={[styles.colorPair, { backgroundColor: brand.blue }]}>
+                <View style={[styles.colorPairDot, { backgroundColor: brand.yellow }]} />
+              </View>
+              <View style={[styles.colorPair, { backgroundColor: brand.peach }]}>
+                <View style={[styles.colorPairDot, { backgroundColor: brand.purple }]} />
+              </View>
+            </View>
+          </View>
+        ) : null}
         {children}
       </SafeAreaView>
     </View>
   );
 }
 
-function LoadingScreen() {
+function LoadingScreen({ onReady }: { onReady: () => void }) {
+  const fullText = 'Welcome to\nTEDxSapienzaU\n2026 !';
+  const [displayText, setDisplayText] = useState('');
+
+  useEffect(() => {
+    let index = 0;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const typeTimer = setInterval(() => {
+      index += 1;
+      setDisplayText(fullText.slice(0, index));
+
+      if (index >= fullText.length) {
+        clearInterval(typeTimer);
+        timers.push(
+          setTimeout(() => {
+            onReady();
+          }, 1800),
+        );
+      }
+    }, 42);
+
+    return () => {
+      clearInterval(typeTimer);
+      timers.forEach(clearTimeout);
+    };
+  }, [fullText, onReady]);
+
   return (
-    <PageLayout>
+    <PageLayout
+      backgroundSource={serpentoniBackgrounds[2]}
+      desktopBackgroundSource={serpentoniDesktopBackgrounds[2]}
+      showHeader={false}
+    >
       <View style={styles.welcomeContainer}>
-        <Text style={styles.welcomeMain}>TEDxSapienzaU</Text>
-        <Text style={styles.welcomeYear}>On The Brink</Text>
+        <Text style={styles.welcomeTypedText}>
+          {displayText}
+          {displayText.length < fullText.length ? '|' : ''}
+        </Text>
       </View>
     </PageLayout>
   );
 }
 
 function TalksScreen({ onOpenLive }: { onOpenLive: (talk: Talk) => void }) {
-  return (
-    <PageLayout>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <Text style={styles.sectionTitle}>TALKS</Text>
-        <Text style={styles.sectionSubtitle}>
-          Questo breve testo spiega che ci sono le captions istantanee e il riassunto ad ogni talk.
-        </Text>
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
 
-        <View style={styles.talksGrid}>
-          {talks.map((talk) => (
-            <Pressable key={talk.id} style={styles.talkCard} onPress={() => onOpenLive(talk)}>
-              <Text style={styles.cardTitle}>{talk.title.toUpperCase()}</Text>
+  return (
+    <PageLayout desktopBackgroundSource={serpentoniDesktopBackgrounds[0]}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContainer, isDesktop && styles.scrollContainerDesktop]}
+        showsVerticalScrollIndicator={false}
+      >
+        <SectionHeader
+          title="Talks"
+          subtitle="Caption istantanee e riassunti per ogni talk, in tempo reale."
+        />
+
+        <View style={[styles.talksGrid, isDesktop && styles.talksGridDesktop]}>
+          {talks.map((talk, index) => (
+            <Pressable key={talk.id} style={[styles.talkCard, isDesktop && styles.talkCardDesktop]} onPress={() => onOpenLive(talk)}>
+              <Text style={styles.cardTitle}>{talk.title}</Text>
               <Text style={styles.cardSpeaker}>{talk.speaker}</Text>
               <Text style={styles.cardTime}>{talk.time}</Text>
             </Pressable>
@@ -141,14 +246,19 @@ function TalksScreen({ onOpenLive }: { onOpenLive: (talk: Talk) => void }) {
 }
 
 function SponsorsScreen() {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+
   return (
-    <PageLayout>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <Text style={styles.sectionTitle}>SPONSORS</Text>
-        <Text style={styles.sectionSubtitle}>Partners and brands supporting TEDxSapienzaU.</Text>
-        <View style={styles.sponsorsGrid}>
-          {sponsors.map((sponsor) => (
-            <View key={sponsor} style={styles.sponsorCard}>
+    <PageLayout backgroundSource={serpentoniBackgrounds[1]} desktopBackgroundSource={serpentoniDesktopBackgrounds[1]}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContainer, isDesktop && styles.scrollContainerDesktop]}
+        showsVerticalScrollIndicator={false}
+      >
+        <SectionHeader title="Sponsors" subtitle="Partners and brands supporting TEDxSapienzaU." />
+        <View style={[styles.sponsorsGrid, isDesktop && styles.sponsorsGridDesktop]}>
+          {sponsors.map((sponsor, index) => (
+            <View key={sponsor} style={[styles.sponsorCard, isDesktop && styles.sponsorCardDesktop]}>
               <Text style={styles.sponsorText}>{sponsor}</Text>
             </View>
           ))}
@@ -180,7 +290,7 @@ function LiveLyricsPanel({
   });
   const transitioningCurrentToGrayColor = colorAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#ffffff', '#cfcfcf'],
+    outputRange: [brand.white, 'rgba(255,255,255,0.72)'],
   });
   const incomingTranslateY = transitionAnim.interpolate({
     inputRange: [0, 1],
@@ -241,16 +351,21 @@ function TalkDetailScreen({
   talk: Talk;
   onBack: () => void;
 }) {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+
   return (
-    <PageLayout>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+    <PageLayout desktopBackgroundSource={serpentoniDesktopBackgrounds[0]}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContainer, isDesktop && styles.scrollContainerDesktopNarrow]}
+        showsVerticalScrollIndicator={false}
+      >
         <Pressable style={styles.backButton} onPress={onBack}>
-          <Ionicons name="arrow-back" size={16} color="#ffffff" />
+          <Ionicons name="arrow-back" size={16} color={brand.black} />
           <Text style={styles.backButtonText}>Back to talks</Text>
         </Pressable>
 
-        <Text style={styles.sectionTitle}>{talk.title.toUpperCase()}</Text>
-        <Text style={styles.sectionSubtitle}>{talk.description}</Text>
+        <SectionHeader title={talk.title} subtitle={talk.description} />
 
         {/* <View style={styles.liveImageWrap}>
           <Image
@@ -289,13 +404,16 @@ function LivePageScreen({
   transitionAnim: Animated.Value;
   colorAnim: Animated.Value;
 }) {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+
   return (
-    <PageLayout>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <Text style={styles.sectionTitle}>LIVE</Text>
-        <Text style={styles.sectionSubtitle}>
-          Now on stage: {talk.title} by {talk.speaker}.
-        </Text>
+    <PageLayout backgroundSource={serpentoniBackgrounds[2]} desktopBackgroundSource={serpentoniDesktopBackgrounds[2]}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContainer, isDesktop && styles.scrollContainerDesktopNarrow]}
+        showsVerticalScrollIndicator={false}
+      >
+        <SectionHeader title="Live" subtitle={`Now on stage: ${talk.title} by ${talk.speaker}.`} />
         <LiveLyricsPanel
           leadText={`Traduzione live di ${talk.speaker}`}
           currentCaption={currentCaption}
@@ -322,15 +440,82 @@ export default function App() {
 
   const transitionAnim = useState(new Animated.Value(0))[0];
   const colorAnim = useState(new Animated.Value(0))[0];
+  const screenOpacity = useRef(new Animated.Value(1)).current;
+  const introOpacity = useRef(new Animated.Value(1)).current;
+  const appIntroOpacity = useRef(new Animated.Value(0)).current;
   const isAnimatingCaptionRef = useRef(false);
   const queuedCaptionRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
+  const finishIntro = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(introOpacity, {
+        toValue: 0,
+        duration: 850,
+        easing: Easing.inOut(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(appIntroOpacity, {
+        toValue: 1,
+        duration: 850,
+        easing: Easing.inOut(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
       setIsLoading(false);
-    }, 1300);
-    return () => clearTimeout(timer);
-  }, []);
+      introOpacity.setValue(1);
+      appIntroOpacity.setValue(0);
+    });
+  }, [appIntroOpacity, introOpacity]);
+
+  const transitionScreen = useCallback(
+    (updateScreen: () => void) => {
+      Animated.timing(screenOpacity, {
+        toValue: 0,
+        duration: 160,
+        easing: Easing.inOut(Easing.quad),
+        useNativeDriver: true,
+      }).start(() => {
+        updateScreen();
+        Animated.timing(screenOpacity, {
+          toValue: 1,
+          duration: 240,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }).start();
+      });
+    },
+    [screenOpacity],
+  );
+
+  const navigateToTab = useCallback(
+    (tab: TabKey) => {
+      if (view === 'tabs' && activeTab === tab) {
+        return;
+      }
+      transitionScreen(() => {
+        setView('tabs');
+        setActiveTab(tab);
+      });
+    },
+    [activeTab, transitionScreen, view],
+  );
+
+  const openTalkDetail = useCallback(
+    (talk: Talk) => {
+      transitionScreen(() => {
+        setSelectedTalk(talk);
+        setView('talkDetail');
+      });
+    },
+    [transitionScreen],
+  );
+
+  const goBackToTalks = useCallback(() => {
+    transitionScreen(() => {
+      setView('tabs');
+      setActiveTab('Talks');
+    });
+  }, [transitionScreen]);
 
   useEffect(() => {
     const animateToCaption = (incomingText: string) => {
@@ -415,50 +600,85 @@ export default function App() {
       );
     }
     return (
-      <TalksScreen
-        onOpenLive={(talk) => {
-          setSelectedTalk(talk);
-          setView('talkDetail');
-        }}
-      />
+      <TalksScreen onOpenLive={openTalkDetail} />
     );
-  }, [activeTab, liveCaptions.current, liveCaptions.previous, liveCaptions.incoming, transitionAnim, colorAnim]);
+  }, [activeTab, liveCaptions.current, liveCaptions.previous, liveCaptions.incoming, transitionAnim, colorAnim, openTalkDetail]);
 
   return (
     <View style={styles.appRoot}>
       <StatusBar style="light" />
-      {isLoading ? (
-        <LoadingScreen />
-      ) : view === 'talkDetail' ? (
-        <TalkDetailScreen
-          talk={selectedTalk}
-          onBack={() => {
-            setView('tabs');
-            setActiveTab('Talks');
-          }}
-        />
-      ) : (
-        <>
-          {tabScreen}
-          <SafeAreaView style={styles.tabBarSafeArea}>
-            <View style={styles.tabBar}>
-              {tabs.map((tab) => {
-                const isActive = activeTab === tab.key;
-                const color = isActive ? '#ffffff' : '#c18fa0';
-                return (
-                  <Pressable key={tab.key} style={styles.tabButton} onPress={() => setActiveTab(tab.key)}>
-                    <Ionicons name={tab.icon} size={20} color={color} />
-                    <Text style={[styles.tabLabel, { color }]}>{tab.key}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </SafeAreaView>
-        </>
-      )}
+      <View style={styles.appFrame}>
+        {isLoading ? (
+          <>
+            <Animated.View style={[styles.screenTransition, styles.introAppPreview, { opacity: appIntroOpacity }]}>
+              <TalksScreen onOpenLive={openTalkDetail} />
+              <SafeAreaView style={styles.tabBarSafeArea}>
+                <View style={styles.tabBar}>
+                  {tabs.map((tab) => {
+                    const isActive = tab.key === 'Talks';
+                    const pair = tabColorPairs[tab.key];
+                    const color = brand.white;
+                    return (
+                      <View
+                        key={tab.key}
+                        style={[styles.tabButton, isActive && styles.tabButtonActive, isActive && { backgroundColor: pair.bg }]}
+                      >
+                        <View style={[styles.tabIconBadge, { backgroundColor: isActive ? 'transparent' : pair.bg }]}>
+                          <Ionicons name={tab.icon} size={17} color={color} />
+                        </View>
+                        <Text style={[styles.tabLabel, { color }]}>{tab.key}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </SafeAreaView>
+            </Animated.View>
+            <Animated.View pointerEvents="none" style={[styles.introOverlay, { opacity: introOpacity }]}>
+              <LoadingScreen onReady={finishIntro} />
+            </Animated.View>
+          </>
+        ) : view === 'talkDetail' ? (
+          <Animated.View style={[styles.screenTransition, { opacity: screenOpacity }]}>
+            <TalkDetailScreen talk={selectedTalk} onBack={goBackToTalks} />
+          </Animated.View>
+        ) : (
+          <>
+            <Animated.View style={[styles.screenTransition, { opacity: screenOpacity }]}>
+              {tabScreen}
+            </Animated.View>
+            <SafeAreaView style={styles.tabBarSafeArea}>
+              <View style={styles.tabBar}>
+                {tabs.map((tab) => {
+                  const isActive = activeTab === tab.key;
+                  const pair = tabColorPairs[tab.key];
+                  const color = brand.white;
+                  return (
+                    <Pressable
+                      key={tab.key}
+                      style={[styles.tabButton, isActive && styles.tabButtonActive, isActive && { backgroundColor: pair.bg }]}
+                      onPress={() => navigateToTab(tab.key)}
+                    >
+                      <View style={[styles.tabIconBadge, { backgroundColor: isActive ? 'transparent' : pair.bg }]}>
+                        <Ionicons name={tab.icon} size={17} color={color} />
+                      </View>
+                      <Text style={[styles.tabLabel, { color }]}>{tab.key}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </SafeAreaView>
+          </>
+        )}
+      </View>
     </View>
   );
 }
+
+const tabColorPairs: Record<TabKey, { bg: string; active: string }> = {
+  Talks: { bg: brand.green, active: brand.pink },
+  Sponsors: { bg: brand.blue, active: brand.yellow },
+  Live: { bg: brand.peach, active: brand.purple },
+};
 
 function startMockServerConsumer(onText: (text: string) => void) {
   const socket = new WebSocket(MOCK_WS_URL);
@@ -489,45 +709,164 @@ function startMockServerConsumer(onText: (text: string) => void) {
 }
 
 const styles = StyleSheet.create({
-  appRoot: { flex: 1, backgroundColor: '#150209' },
-  gradient: {
+  appRoot: {
     flex: 1,
-    backgroundColor: '#5f0c22',
-    shadowColor: '#000',
+    backgroundColor: '#202020',
+  },
+  appFrame: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: brand.black,
+    overflow: 'hidden',
+  },
+  screenTransition: { flex: 1 },
+  introAppPreview: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  introOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  pageSurface: {
+    flex: 1,
+    backgroundColor: brand.black,
+    overflow: 'hidden',
+  },
+  pageBackgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+  },
+  pageDimmer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.34)',
   },
   screenSafeArea: { flex: 1 },
   topBrandBar: {
-    height: 42,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    minHeight: 42,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderBottomColor: 'rgba(255,255,255,0.14)',
     borderBottomWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    gap: 3,
+    paddingVertical: 6,
   },
-  brandTed: { color: '#e10613', fontWeight: '700' },
-  brandName: { color: '#e6d3d9', fontWeight: '500' },
-  welcomeContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  welcomeTitle: { color: '#ffffff', fontSize: 36, fontWeight: '700', textAlign: 'center' },
-  welcomeMain: { color: '#ffffff', fontSize: 46, fontWeight: '800', textAlign: 'center' },
-  welcomeYear: { color: '#ffffff', fontSize: 44, fontWeight: '800', textAlign: 'center' },
-  scrollContainer: { paddingHorizontal: 20, paddingVertical: 14, paddingBottom: 28 },
-  sectionTitle: { color: '#ffffff', fontSize: 44, fontWeight: '900' },
-  sectionSubtitle: { color: '#f0d5de', marginTop: 4, marginBottom: 16, fontSize: 14, lineHeight: 18 },
+  brandLockup: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 4,
+  },
+  brandTed: { color: '#e10613', fontWeight: '900', fontSize: 18 },
+  brandName: { color: brand.white, fontWeight: '800', fontSize: 18 },
+  miniColorPairs: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  colorPair: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  colorPairDot: {
+    width: 11,
+    height: 11,
+    borderRadius: 999,
+  },
+  welcomeContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 38,
+  },
+  welcomeTitle: { color: brand.black, fontSize: 36, fontWeight: '900', textAlign: 'center' },
+  welcomeMain: {
+    color: brand.white,
+    fontSize: 28,
+    lineHeight: 31,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  welcomeYear: { color: brand.white, fontSize: 30, lineHeight: 33, fontWeight: '900', textAlign: 'center' },
+  welcomeTypedText: {
+    color: brand.white,
+    fontSize: 31,
+    lineHeight: 34,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  scrollContainer: { paddingHorizontal: 20, paddingVertical: 48, paddingBottom: 116 },
+  scrollContainerDesktop: {
+    width: '100%',
+    maxWidth: 1120,
+    alignSelf: 'center',
+    paddingHorizontal: 40,
+    paddingTop: 72,
+  },
+  scrollContainerDesktopNarrow: {
+    width: '100%',
+    maxWidth: 760,
+    alignSelf: 'center',
+    paddingHorizontal: 40,
+    paddingTop: 72,
+  },
+  sectionHeader: {
+    marginBottom: 14,
+    paddingHorizontal: 2,
+  },
+  sectionTitle: { color: brand.white, fontSize: 48, lineHeight: 52, fontWeight: '900', textAlign: 'center' },
+  sectionSubtitle: {
+    color: brand.white,
+    marginTop: 5,
+    marginBottom: 18,
+    fontSize: 12,
+    lineHeight: 15,
+    maxWidth: 260,
+    alignSelf: 'center',
+    textAlign: 'center',
+  },
   talksGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12 },
+  talksGridDesktop: {
+    gap: 18,
+  },
   talkCard: {
     width: '47%',
-    minHeight: 125,
-    borderRadius: 20,
+    minHeight: 118,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-    backgroundColor: 'rgba(255,255,255,0.09)',
+    borderColor: 'rgba(255,255,255,0.36)',
+    backgroundColor: 'rgba(255,255,255,0.18)',
     padding: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
   },
-  cardTitle: { color: '#ffffff', fontWeight: '800', fontSize: 26 },
-  cardSpeaker: { color: '#ffffff', opacity: 0.9, fontSize: 16 },
-  cardTime: { color: '#f0d5de', marginTop: 'auto', fontSize: 13, paddingTop: 8 },
+  talkCardDesktop: {
+    width: '31.5%',
+    minHeight: 150,
+    padding: 18,
+  },
+  cardColorBlock: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 44,
+    height: 44,
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: brand.black,
+  },
+  cardTitle: {
+    color: brand.white,
+    fontWeight: '900',
+    fontSize: 20,
+    lineHeight: 21,
+  },
+  cardSpeaker: { color: brand.white, fontSize: 12, fontWeight: '700', marginTop: 2 },
+  cardTime: { color: brand.white, marginTop: 'auto', fontSize: 10, paddingTop: 10, fontWeight: '700' },
   previousButton: {
     marginTop: 18,
     alignSelf: 'center',
@@ -540,19 +879,19 @@ const styles = StyleSheet.create({
   },
   previousButtonText: { color: '#ffffff', fontWeight: '700', fontSize: 12, letterSpacing: 0.5 },
   backButton: {
-    marginBottom: 10,
+    marginBottom: 16,
     alignSelf: 'flex-start',
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: brand.black,
+    backgroundColor: brand.yellow,
     paddingHorizontal: 12,
     paddingVertical: 8,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
-  backButtonText: { color: '#ffffff', fontSize: 12, fontWeight: '700' },
+  backButtonText: { color: brand.black, fontSize: 12, fontWeight: '900' },
   liveImageWrap: {
     marginTop: 8,
     borderRadius: 16,
@@ -577,23 +916,26 @@ const styles = StyleSheet.create({
   liveText: { color: '#ffffff', fontSize: 20, fontWeight: '700' },
   captionCard: {
     borderRadius: 22,
+    width: '100%',
+    alignSelf: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.18)',
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.38)',
+    backgroundColor: 'rgba(255,255,255,0.22)',
     padding: 20,
     minHeight: 360,
+    overflow: 'hidden',
   },
   detailCard: {
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.18)',
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.38)',
+    backgroundColor: 'rgba(255,255,255,0.22)',
     padding: 20,
-    gap: 10,
+    minHeight: 360,
   },
-  detailCardTitle: { color: '#ffffff', fontSize: 22, fontWeight: '800', marginTop: 8 },
-  detailCardText: { color: '#f3dbe2', fontSize: 16, lineHeight: 22 },
-  captionLead: { color: '#e2c2cc', fontWeight: '700', fontSize: 20 },
+  detailCardTitle: { color: brand.white, fontSize: 22, fontWeight: '900', marginTop: 8 },
+  detailCardText: { color: brand.white, fontSize: 16, lineHeight: 22, fontWeight: '600' },
+  captionLead: { color: brand.white, fontWeight: '900', fontSize: 18 },
   captionLyricsArea: {
     marginTop: 14,
     height: LYRICS_SLOT_HEIGHT * 2 + 6,
@@ -601,9 +943,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   captionCurrentLine: {
-    color: '#ffffff',
-    fontSize: 22,
-    fontWeight: '800',
+    color: brand.white,
+    fontSize: 24,
+    fontWeight: '900',
     lineHeight: 34,
     position: 'absolute',
     left: 0,
@@ -613,7 +955,7 @@ const styles = StyleSheet.create({
   },
   captionPreviousLine: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: '900',
     lineHeight: 32,
     position: 'absolute',
     left: 0,
@@ -622,9 +964,9 @@ const styles = StyleSheet.create({
     height: LYRICS_SLOT_HEIGHT,
   },
   captionPreviousLineStatic: {
-    color: '#cfcfcf',
+    color: 'rgba(255,255,255,0.72)',
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: '900',
     lineHeight: 32,
     position: 'absolute',
     left: 0,
@@ -639,31 +981,75 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
+  sponsorsGridDesktop: {
+    gap: 18,
+  },
   sponsorCard: {
     width: '47%',
     height: 100,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.36)',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sponsorText: { color: '#ffffff', fontSize: 20, fontWeight: '800' },
+  sponsorCardDesktop: {
+    width: '31.5%',
+    height: 130,
+  },
+  sponsorDot: {},
+  sponsorText: { color: brand.white, fontSize: 20, fontWeight: '900' },
   tabBarSafeArea: {
-    backgroundColor: '#1c0910',
+    backgroundColor: 'transparent',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   tabBar: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.15)',
-    backgroundColor: '#1c0910',
-    height: 74,
+    borderTopColor: 'rgba(255,255,255,0.34)',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderLeftColor: 'rgba(255,255,255,0.24)',
+    borderRightColor: 'rgba(255,255,255,0.24)',
+    backgroundColor: 'rgba(255,255,255,0.20)',
+    minHeight: 76,
+    marginHorizontal: 14,
+    marginBottom: 10,
+    borderRadius: 22,
     paddingBottom: 8,
-    paddingTop: 6,
+    paddingTop: 8,
+    paddingHorizontal: 8,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOpacity: 0.26,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
   },
-  tabButton: { alignItems: 'center', justifyContent: 'center', gap: 3, minWidth: 72 },
-  tabLabel: { fontWeight: '700', fontSize: 11 },
+  tabButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    minWidth: 78,
+    minHeight: 54,
+    borderRadius: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  tabButtonActive: {
+    paddingHorizontal: 22,
+  },
+  tabIconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabLabel: { fontWeight: '900', fontSize: 12 },
 });
