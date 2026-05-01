@@ -86,7 +86,13 @@ const sponsors = ['Enel', 'Google', 'Acea', 'TIM', 'Fastweb', 'Rai'];
 
 type TabKey = 'Talks' | 'Sponsors' | 'Live';
 type AppView = 'tabs' | 'talkDetail';
-const MOCK_WS_URL = 'ws://localhost:8080';
+// ─── Live API configuration ──────────────────────────────────────────────────
+// NOTE: In production, API_KEY must never ship inside the client app.
+// Move consumer-token issuance to a backend proxy and pass only the token here.
+const API_BASE_URL = 'https://tedxapi.hyper-foundry.com';
+const API_KEY = ''; // <-- insert your AUTH_API_KEY here (server-to-server only!)
+const SESSION_ID = ''; // <-- insert the live-session ID created by the backend
+// ──────────────────────────────────────────────────────────────────────────────
 const LYRICS_SLOT_HEIGHT = 150;
 const brand = {
   black: '#050505',
@@ -228,7 +234,7 @@ function TalksScreen({ onOpenLive }: { onOpenLive: (talk: Talk) => void }) {
       >
         <SectionHeader
           title="Talks"
-          subtitle="Caption istantanee e riassunti per ogni talk, in tempo reale."
+          subtitle=""
         />
 
         <View style={[styles.talksGrid, isDesktop && styles.talksGridDesktop]}>
@@ -571,7 +577,7 @@ export default function App() {
       });
     };
 
-    const stopConsumer = startMockServerConsumer((incomingText) => {
+    const stopConsumer = startLiveConsumer((incomingText) => {
       animateToCaption(incomingText);
     });
     return stopConsumer;
@@ -680,29 +686,129 @@ const tabColorPairs: Record<TabKey, { bg: string; active: string }> = {
   Live: { bg: brand.peach, active: brand.purple },
 };
 
-function startMockServerConsumer(onText: (text: string) => void) {
-  const socket = new WebSocket(MOCK_WS_URL);
+/**
+ * Fetches a short-lived consumer token from the live API, then opens the
+ * events WebSocket and forwards translated_text to the onText callback.
+ *
+ * The returned function tears down the connection (safe to call multiple times).
+ */
+function startLiveConsumer(onText: (text: string) => void): () => void {
+  let socket: WebSocket | null = null;
+  let stopped = false;
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
-  socket.onopen = () => {
-    console.log(`[MockWS] Connected to ${MOCK_WS_URL}`);
-  };
+  // Validate config before attempting any network call
+  if (!API_KEY || !SESSION_ID) {
+    console.warn(
+      '[LiveWS] API_KEY or SESSION_ID is not configured. ' +
+      'Set the constants at the top of App.tsx to enable live captions.',
+    );
+    return () => { };
+  }
 
-  socket.onmessage = (event) => {
-    const text = typeof event.data === 'string' ? event.data : String(event.data);
-    console.log(`[MockWS] ${text}`);
-    onText(text);
-  };
+  async function connect() {
+    if (stopped) return;
 
-  socket.onerror = (event) => {
-    console.log('[MockWS] Connection error', event);
-  };
+    // ── 1. Obtain a consumer token ───────────────────────────────────────────
+    let eventsWsUrl: string;
+    let consumerToken: string;
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/v1/live-sessions/${SESSION_ID}/consumer-tokens`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ttl_seconds: 900 }),
+        },
+      );
 
-  socket.onclose = () => {
-    console.log('[MockWS] Disconnected');
-  };
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`HTTP ${response.status}: ${body}`);
+      }
 
+      const data = await response.json();
+      eventsWsUrl = data.events_ws_url as string;
+      consumerToken = data.consumer_token as string;
+      console.log('[LiveWS] Consumer token obtained, connecting to events WS…');
+    } catch (err) {
+      console.error('[LiveWS] Failed to obtain consumer token:', err);
+      if (!stopped) {
+        reconnectTimer = setTimeout(connect, 8000);
+      }
+      return;
+    }
+
+    if (stopped) return;
+
+    // ── 2. Open the events WebSocket ─────────────────────────────────────────
+    // Append the consumer token as a query parameter
+    const wsUrl = `${eventsWsUrl}?token=${encodeURIComponent(consumerToken)}`;
+    socket = new WebSocket(wsUrl);
+
+    socket.onopen = () => {
+      console.log('[LiveWS] Connected to events stream.');
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const raw = typeof event.data === 'string' ? event.data : String(event.data);
+        const msg = JSON.parse(raw) as {
+          event?: string;
+          status?: string;
+          translated_text?: string;
+          source_text?: string;
+        };
+
+        // Only handle translation_final events
+        if (msg.event !== 'translation_final') return;
+
+        const status = msg.status ?? 'ok';
+
+        if (status === 'translation_error') {
+          // Service could not produce a translation — skip silently
+          console.warn('[LiveWS] translation_error received, skipping segment.');
+          return;
+        }
+
+        // 'ok': use translated_text
+        // 'source_already_target': translated_text mirrors source_text — still display it
+        const text = msg.translated_text ?? msg.source_text ?? '';
+        if (text) {
+          console.log(`[LiveWS] ${status} → "${text}"`);
+          onText(text);
+        }
+      } catch (parseErr) {
+        console.warn('[LiveWS] Could not parse message:', parseErr);
+      }
+    };
+
+    socket.onerror = (errorEvent) => {
+      console.error('[LiveWS] WebSocket error:', errorEvent);
+    };
+
+    socket.onclose = (closeEvent) => {
+      console.log(`[LiveWS] Connection closed (code ${closeEvent.code}). Reconnecting in 5s…`);
+      socket = null;
+      if (!stopped) {
+        reconnectTimer = setTimeout(connect, 5000);
+      }
+    };
+  }
+
+  // Kick off the first connection attempt
+  connect();
+
+  // Return a teardown function
   return () => {
-    if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+    stopped = true;
+    if (reconnectTimer !== null) {
+      clearTimeout(reconnectTimer);
+    }
+    if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
       socket.close();
     }
   };
