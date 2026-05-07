@@ -136,6 +136,7 @@ const serpentoniDesktopBackgrounds = [
   require("./assets/serpentoni-desktop-blue-yellow.png"),
   require("./assets/serpentoni-desktop-purple-peach.png"),
 ] satisfies ImageSourcePropType[];
+const eventLogo = require("./assets/logo_white.png");
 type LiveCaptionState = {
   current: string;
   previous: string | null;
@@ -187,35 +188,11 @@ function PageLayout({
         {showHeader ? (
           <View style={styles.topBrandBar}>
             <View style={styles.brandLockup}>
-              <Text style={styles.brandTed}>TEDx</Text>
-              <Text style={styles.brandName}>SapienzaU</Text>
-            </View>
-            <View style={styles.miniColorPairs}>
-              <View
-                style={[styles.colorPair, { backgroundColor: brand.green }]}
-              >
-                <View
-                  style={[styles.colorPairDot, { backgroundColor: brand.pink }]}
-                />
-              </View>
-              <View style={[styles.colorPair, { backgroundColor: brand.blue }]}>
-                <View
-                  style={[
-                    styles.colorPairDot,
-                    { backgroundColor: brand.yellow },
-                  ]}
-                />
-              </View>
-              <View
-                style={[styles.colorPair, { backgroundColor: brand.peach }]}
-              >
-                <View
-                  style={[
-                    styles.colorPairDot,
-                    { backgroundColor: brand.purple },
-                  ]}
-                />
-              </View>
+              <Image
+                source={eventLogo}
+                resizeMode="contain"
+                style={styles.headerLogo}
+              />
             </View>
           </View>
         ) : null}
@@ -271,6 +248,28 @@ function LoadingScreen({ onReady }: { onReady: () => void }) {
 function TalksScreen({ onOpenLive }: { onOpenLive: (talk: Talk) => void }) {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
+  const nowPulse = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(nowPulse, {
+          toValue: 1.1,
+          duration: 720,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(nowPulse, {
+          toValue: 1,
+          duration: 720,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [nowPulse]);
 
   return (
     <PageLayout desktopBackgroundSource={serpentoniDesktopBackgrounds[0]}>
@@ -287,12 +286,35 @@ function TalksScreen({ onOpenLive }: { onOpenLive: (talk: Talk) => void }) {
           {talks.map((talk, index) => (
             <Pressable
               key={talk.id}
-              style={[styles.talkCard, isDesktop && styles.talkCardDesktop]}
+              style={[
+                styles.talkCard,
+                talk.time === "starting now" && styles.talkCardNow,
+                isDesktop && styles.talkCardDesktop,
+              ]}
               onPress={() => onOpenLive(talk)}
             >
-              <Text style={styles.cardTitle}>{talk.title}</Text>
+              <Text
+                style={styles.cardTitle}
+                numberOfLines={2}
+                adjustsFontSizeToFit
+                minimumFontScale={0.82}
+              >
+                {talk.title}
+              </Text>
               <Text style={styles.cardSpeaker}>{talk.speaker}</Text>
-              <Text style={styles.cardTime}>{talk.time}</Text>
+              {talk.time === "starting now" ? (
+                <Animated.View
+                  style={[
+                    styles.nowStatusRow,
+                    { transform: [{ scale: nowPulse }] },
+                  ]}
+                >
+                  <View style={styles.nowBadgeDot} />
+                  <Text style={styles.cardTimeNow}>starting now</Text>
+                </Animated.View>
+              ) : (
+                <Text style={styles.cardTime}>{talk.time}</Text>
+              )}
             </Pressable>
           ))}
         </View>
@@ -440,7 +462,7 @@ function TalkDetailScreen({
         showsVerticalScrollIndicator={false}
       >
         <Pressable style={styles.backButton} onPress={onBack}>
-          <Ionicons name="arrow-back" size={16} color={brand.black} />
+          <Ionicons name="arrow-back" size={16} color={brand.white} />
           <Text style={styles.backButtonText}>Back to talks</Text>
         </Pressable>
 
@@ -730,11 +752,6 @@ export default function App() {
                         <View
                           style={[
                             styles.tabIconBadge,
-                            {
-                              backgroundColor: isActive
-                                ? "transparent"
-                                : pair.bg,
-                            },
                           ]}
                         >
                           <Ionicons name={tab.icon} size={17} color={color} />
@@ -787,9 +804,6 @@ export default function App() {
                       <View
                         style={[
                           styles.tabIconBadge,
-                          {
-                            backgroundColor: isActive ? "transparent" : pair.bg,
-                          },
                         ]}
                       >
                         <Ionicons name={tab.icon} size={17} color={color} />
@@ -986,38 +1000,24 @@ const styles = StyleSheet.create({
   },
   screenSafeArea: { flex: 1 },
   topBrandBar: {
-    minHeight: 42,
+    minHeight: 58,
     backgroundColor: "rgba(255,255,255,0.16)",
     borderBottomColor: "rgba(255,255,255,0.14)",
     borderBottomWidth: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   brandLockup: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 4,
-  },
-  brandTed: { color: "#e10613", fontWeight: "900", fontSize: 18 },
-  brandName: { color: brand.white, fontWeight: "800", fontSize: 18 },
-  miniColorPairs: {
-    flexDirection: "row",
-    gap: 6,
-  },
-  colorPair: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
     alignItems: "center",
     justifyContent: "center",
   },
-  colorPairDot: {
-    width: 11,
-    height: 11,
-    borderRadius: 999,
+  headerLogo: {
+    width: 174,
+    height: 28,
   },
   welcomeContainer: {
     flex: 1,
@@ -1054,7 +1054,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 48,
+    paddingTop: 28,
     paddingBottom: 116,
   },
   scrollContainerDesktop: {
@@ -1114,6 +1114,12 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 10 },
   },
+  talkCardNow: {
+    borderColor: "rgba(255,255,255,0.82)",
+    backgroundColor: "rgba(136,222,134,0.34)",
+    shadowOpacity: 0.42,
+    shadowRadius: 24,
+  },
   talkCardDesktop: {
     width: "31.5%",
     minHeight: 150,
@@ -1132,8 +1138,8 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: brand.white,
     fontWeight: "900",
-    fontSize: 20,
-    lineHeight: 21,
+    fontSize: 19,
+    lineHeight: 20,
   },
   cardSpeaker: {
     color: brand.white,
@@ -1147,6 +1153,24 @@ const styles = StyleSheet.create({
     fontSize: 10,
     paddingTop: 10,
     fontWeight: "700",
+  },
+  nowStatusRow: {
+    marginTop: "auto",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingTop: 10,
+  },
+  cardTimeNow: {
+    color: brand.white,
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  nowBadgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: "#ff2e3f",
   },
   previousButton: {
     marginTop: 18,
@@ -1167,17 +1191,17 @@ const styles = StyleSheet.create({
   backButton: {
     marginBottom: 16,
     alignSelf: "flex-start",
-    borderRadius: 0,
-    borderWidth: 2,
-    borderColor: brand.black,
-    backgroundColor: brand.yellow,
-    paddingHorizontal: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.36)",
+    backgroundColor: "rgba(255,255,255,0.16)",
+    paddingHorizontal: 14,
     paddingVertical: 8,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
   },
-  backButtonText: { color: brand.black, fontSize: 12, fontWeight: "900" },
+  backButtonText: { color: brand.white, fontSize: 12, fontWeight: "900" },
   liveImageWrap: {
     marginTop: 8,
     borderRadius: 16,
@@ -1346,9 +1370,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
   },
   tabIconBadge: {
-    width: 34,
-    height: 34,
-    borderRadius: 9,
+    width: 28,
+    height: 28,
     alignItems: "center",
     justifyContent: "center",
   },
