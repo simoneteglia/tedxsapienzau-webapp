@@ -4,6 +4,7 @@ import {
   Animated,
   Easing,
   Image,
+  Linking,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -30,76 +31,95 @@ type Talk = {
   description: string;
   speakerBio: string;
   lastCaption: string;
+  link?: string;
 };
 
 const talks: Talk[] = [
   {
     id: "1",
-    title: "Future Ideas",
-    speaker: "Giulia R.",
-    time: "starting at: 16:30",
-    description: "A short journey into ideas that can reshape the next decade.",
+    title: "Aurora Ruffino",
+    speaker: "Attrice, scrittrice e ricercatrice filosofica",
+    time: "Speaker",
+    description: "Attrice, scrittrice e ricercatrice filosofica.",
     speakerBio:
-      "Innovation strategist and startup mentor, Giulia helps early-stage teams turn bold ideas into products people actually use.",
+      "Aurora Ruffino debutta con La solitudine dei numeri primi di Saverio Costanzo. Diplomata al Centro Sperimentale di Cinematografia, recita in Bianca come il latte, rossa come il sangue ed in Braccialetti Rossi. E la sirena di Ninyo di Gabriele Mainetti e protagonista di Noi. Esordisce nel 2024 con il primo romanzo Volevo salvare i colori. Sara Santa Lucia nella prossima produzione di Martin Scorsese.",
     lastCaption:
-      "L immaginazione non e evasione, e il primo passo per costruire.",
+      "Aurora Ruffino debutta con La solitudine dei numeri primi.",
   },
   {
     id: "2",
-    title: "Design Shift",
-    speaker: "Marco P.",
-    time: "starting now",
+    title: "Giuliana Mazzoni",
+    speaker:
+      "Professore Ordinario di Psicologia in quiescenza, Sapienza Universita di Roma",
+    time: "Speaker",
     description:
-      "How design can become a social language, not only a visual one.",
+      "Professore Ordinario di Psicologia in quiescenza, Sapienza Universita di Roma.",
     speakerBio:
-      "Product designer and creative director, Marco works at the intersection of digital experiences, culture, and accessibility.",
+      "Giuliana Mazzoni e nota a livello internazionale per i suoi lavori sulla memoria umana, e in particolare la memoria di avvenimenti personali. Il suo lavoro sulla relazione tra memoria e testimonianza, le potenziali fallacie e le corrette metodologie di ascolto, ha avuto un'importante influenza sul mondo del diritto, soprattutto nei paesi di lingua spagnola e in Italia.",
     lastCaption:
-      "Il design non decora: mette ordine nel caos e crea nuove possibilita.",
+      "La memoria umana e al centro del lavoro di Giuliana Mazzoni.",
   },
   {
     id: "3",
-    title: "Creativity",
-    speaker: "Sara N.",
-    time: "starting at: 17:10",
-    description: "Creativity as a method to solve real and urgent problems.",
+    title: "Lorenzo Zazzeri",
+    speaker: "Atleta professionista",
+    time: "Speaker",
+    description: "Atleta professionista.",
     speakerBio:
-      "Educator and author, Sara builds creative learning programs for universities, nonprofits, and youth communities.",
+      "Lorenzo Zazzeri, nato a Firenze nel 1994, e l'attuale Capitano della Nazionale Italiana di Nuoto. Oltre agli straordinari successi sportivi, ha conseguito con lode la laurea in Scienze Motorie, Sport e Salute e il premio da parte del CONI come \"Atleta Eccellente/Eccellente Studente\" nel 2023. E attualmente iscritto al terzo anno di Belle Arti all'indirizzo \"Arti Visive\" e conduce il Podcast Sportiva-Mente.",
     lastCaption:
-      "La creativita e allenamento quotidiano, non ispirazione casuale.",
+      "Sport, studio e arti visive si incontrano nel percorso di Lorenzo Zazzeri.",
+    link: "https://www.linkedin.com/in/lorenzo-zazzeri-oly-148b5b292/",
   },
   {
     id: "4",
-    title: "Human Tech",
-    speaker: "Lorenzo V.",
-    time: "starting at: 17:50",
-    description: "Technology that supports people, communities and trust.",
+    title: "Alessandra Amato & Claudio Cocino",
+    speaker:
+      "Etoile e Primo Ballerino del corpo di ballo del Teatro dell'Opera di Roma",
+    time: "Artists",
+    description:
+      "Etoile e Primo Ballerino del corpo di ballo del Teatro dell'Opera di Roma.",
     speakerBio:
-      "Tech policy researcher focused on ethical AI, Lorenzo collaborates with civic institutions on responsible innovation.",
+      "Alessandra Amato e Etoile del Teatro dell'Opera di Roma dal 2016, nominata in seguito ad uno spettacolo de Il lago dei cigni. Consolida negli anni la sua partnership con Claudio Cocino, Primo Ballerino del Teatro dell'Opera di Roma dal 2017, nominato in seguito al balletto La bella addormentata. Nelle loro carriere interpretano i ruoli principali nei piu importanti balletti del repertorio classico e del repertorio dei maggiori coreografi del '900 e contemporanei.",
     lastCaption:
-      "La tecnologia migliore e quella che ti restituisce tempo e relazioni.",
+      "Alessandra Amato e Claudio Cocino portano in scena il linguaggio della danza.",
   },
   {
     id: "5",
-    title: "New Cities",
-    speaker: "Francesca B.",
-    time: "starting at: 18:20",
-    description: "Urban futures built around participation and accessibility.",
+    title: "Cristina Simone",
+    speaker:
+      "Professore Ordinario di Economia e Gestione delle Imprese, Sapienza Universita di Roma",
+    time: "Speaker",
+    description:
+      "Professore Ordinario di Economia e Gestione delle Imprese, Sapienza Universita di Roma.",
     speakerBio:
-      "Urban planner and civic designer, Francesca leads participatory projects on mobility and inclusive public spaces.",
+      "Cristina Simone e un professore ordinario di Economia e Gestione delle Imprese alla Sapienza, dove coordina il PhD in Management, Banking e Commodity Science. Supervisiona il progetto Horizon MSCA-GeoPlaReg. Si occupa di management strategico, sistemi complessi, capitalismo digitale e rapporti impresa-territorio. E Visiting Professor all'ITBA in Argentina.",
     lastCaption:
-      "Le citta del futuro si progettano con chi le vive ogni giorno.",
+      "Cristina Simone studia management strategico, sistemi complessi e capitalismo digitale.",
   },
   {
     id: "6",
-    title: "AI + People",
-    speaker: "Alessio C.",
-    time: "starting at: 19:00",
-    description:
-      "A practical look at collaboration between AI systems and humans.",
+    title: "Stefano Magno",
+    speaker: "Chirurgo Senologo",
+    time: "Speaker",
+    description: "Chirurgo Senologo.",
     speakerBio:
-      "AI engineer and speaker, Alessio helps organizations integrate language models into everyday workflows.",
+      "Stefano Magno e un chirurgo senologo e Direttore dell'Unita Operativa Semplice di Terapie Integrate in Senologia presso la Breast Unit della Fondazione Policlinico Gemelli di Roma. E inoltre coordinatore scientifico del Master di I livello in \"Terapie Integrate nelle patologie oncologiche femminili\" e ricopre il ruolo di segretario del Centro di Ricerca e Formazione nelle terapie integrate nelle neoplasie mammarie presso l'Universita Cattolica del Sacro Cuore.",
     lastCaption:
-      "L AI ha valore quando amplifica il giudizio umano, non quando lo sostituisce.",
+      "Stefano Magno lavora sulle terapie integrate in senologia.",
+    link: "https://www.linkedin.com/in/stefano-magno-3b1b03a6/",
+  },
+  {
+    id: "7",
+    title: "Guido Chiefalo",
+    speaker: "Designer e Professore",
+    time: "Speaker",
+    description: "Designer e Professore.",
+    speakerBio:
+      "Guido Chiefalo e un designer nato a Roma nel 1986, opera nel campo della comunicazione visiva e della brand strategy. Attualmente ricopre il ruolo di Art Director alla FAO, Nazioni Unite, ed insegna \"Brand Design\" alla Sapienza Universita di Roma, DCVM. Ha lavorato tra Milano, Londra e Roma, collaborando con agenzie come INAREA, McCann, Slamp e Soda Studio.",
+    lastCaption:
+      "Guido Chiefalo lavora tra comunicazione visiva e brand strategy.",
+    link: "https://www.guifol.com",
   },
 ];
 
@@ -480,10 +500,19 @@ function TalkDetailScreen({
         </View> */}
 
         <View style={styles.detailCard}>
-          <Text style={styles.detailCardTitle}>About this talk</Text>
+          <Text style={styles.detailCardTitle}>Profilo</Text>
           <Text style={styles.detailCardText}>{talk.description}</Text>
-          <Text style={styles.detailCardTitle}>Speaker bio</Text>
+          <Text style={styles.detailCardTitle}>Bio</Text>
           <Text style={styles.detailCardText}>{talk.speakerBio}</Text>
+          {talk.link ? (
+            <Pressable
+              style={styles.profileLinkButton}
+              onPress={() => Linking.openURL(talk.link as string)}
+            >
+              <Ionicons name="open-outline" size={16} color={brand.white} />
+              <Text style={styles.profileLinkText}>Link pubblico</Text>
+            </Pressable>
+          ) : null}
         </View>
       </ScrollView>
     </PageLayout>
@@ -1006,7 +1035,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 8,
@@ -1014,6 +1043,7 @@ const styles = StyleSheet.create({
   brandLockup: {
     alignItems: "center",
     justifyContent: "center",
+    width: "100%",
   },
   headerLogo: {
     width: 174,
@@ -1103,7 +1133,7 @@ const styles = StyleSheet.create({
   },
   talkCard: {
     width: "47%",
-    minHeight: 118,
+    minHeight: 142,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.36)",
@@ -1122,7 +1152,7 @@ const styles = StyleSheet.create({
   },
   talkCardDesktop: {
     width: "31.5%",
-    minHeight: 150,
+    minHeight: 176,
     padding: 18,
   },
   cardColorBlock: {
@@ -1138,14 +1168,15 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: brand.white,
     fontWeight: "900",
-    fontSize: 19,
+    fontSize: 18,
     lineHeight: 20,
   },
   cardSpeaker: {
     color: brand.white,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "700",
-    marginTop: 2,
+    lineHeight: 14,
+    marginTop: 5,
   },
   cardTime: {
     color: brand.white,
@@ -1246,19 +1277,37 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.38)",
     backgroundColor: "rgba(255,255,255,0.22)",
     padding: 20,
-    minHeight: 360,
   },
   detailCardTitle: {
     color: brand.white,
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "900",
-    marginTop: 8,
+    marginTop: 14,
+    marginBottom: 6,
   },
   detailCardText: {
     color: brand.white,
-    fontSize: 16,
+    fontSize: 15,
     lineHeight: 22,
     fontWeight: "600",
+  },
+  profileLinkButton: {
+    alignSelf: "flex-start",
+    marginTop: 18,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.36)",
+    backgroundColor: "rgba(255,255,255,0.14)",
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+  },
+  profileLinkText: {
+    color: brand.white,
+    fontSize: 12,
+    fontWeight: "900",
   },
   captionLead: { color: brand.white, fontWeight: "900", fontSize: 18 },
   captionLyricsArea: {
