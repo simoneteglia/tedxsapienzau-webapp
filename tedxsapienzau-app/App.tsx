@@ -123,7 +123,23 @@ const talks: Talk[] = [
   },
 ];
 
-const sponsors = ["Enel", "Google", "Acea", "TIM", "Fastweb", "Rai"];
+type Sponsor = {
+  name: string;
+  logo?: ImageSourcePropType;
+  isLarge?: boolean;
+};
+
+const sponsors: Sponsor[] = [
+  { name: "Unicredit", logo: require("./assets/sponsors/unicredit.jpg"), isLarge: true },
+  { name: "Autocentri Balduina", logo: require("./assets/sponsors/autocentri-2.png"), isLarge: true },
+  { name: "Hyper Foundry", logo: require("./assets/sponsors/Hyper-Foundry.png") },
+  { name: "Direzione Lavoro", logo: require("./assets/sponsors/direzione-lavoro.png") },
+  { name: "Dotcampus", logo: require("./assets/sponsors/dotcampus.png") },
+  { name: "Pioda", logo: require("./assets/sponsors/pioda.png") },
+  { name: "Il Parioli", logo: require("./assets/sponsors/IlParioli_ML_Pos_Nero SENZA SFONDO.png") },
+  { name: "Tucano" , logo: require("./assets/sponsors/tucano.png") }, // Testo (il file scaricato è .html)
+  { name: "Famo Cose", logo: require("./assets/sponsors/FAMO COSE LOGO.png")  } // Testo (il file scaricato è .html)
+];
 
 type TabKey = "Talks" | "Sponsors" | "Live";
 type AppView = "tabs" | "talkDetail";
@@ -342,7 +358,6 @@ function TalksScreen({ onOpenLive }: { onOpenLive: (talk: Talk) => void }) {
     </PageLayout>
   );
 }
-
 function SponsorsScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
@@ -368,13 +383,26 @@ function SponsorsScreen() {
         >
           {sponsors.map((sponsor, index) => (
             <View
-              key={sponsor}
+              key={sponsor.name}
               style={[
                 styles.sponsorCard,
                 isDesktop && styles.sponsorCardDesktop,
+                // Logica per fare Unicredit e Balduina più grandi!
+                sponsor.isLarge && {
+                  width: isDesktop ? "48%" : "100%", // Più larghi
+                  minHeight: isDesktop ? 180 : 150,  // Più alti
+                  borderColor: "rgba(255,255,255,0.7)", // Bordo più luminoso
+                }
               ]}
             >
-              <Text style={styles.sponsorText}>{sponsor}</Text>
+              {sponsor.logo ? (
+                <Image
+                  source={sponsor.logo}
+                  style={{ width: "80%", height: "80%", resizeMode: "contain" }}
+                />
+              ) : (
+                <Text style={styles.sponsorText}>{sponsor.name}</Text>
+              )}
             </View>
           ))}
         </View>
