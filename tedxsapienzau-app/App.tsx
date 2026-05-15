@@ -177,6 +177,7 @@ type LiveCaptionState = {
   current: string;
   previous: string | null;
   incoming: string | null;
+  history: string[];
 };
 
 function SectionHeader({
@@ -411,81 +412,82 @@ function SponsorsScreen() {
   );
 }
 
-function LiveLyricsPanel({
-  leadText,
+function LiveTranscriptPanel({
   currentCaption,
-  previousCaption,
   incomingCaption,
-  transitionAnim,
+  history,
   colorAnim,
 }: {
-  leadText: string;
   currentCaption: string;
-  previousCaption: string | null;
   incomingCaption: string | null;
-  transitionAnim: Animated.Value;
+  history: string[];
   colorAnim: Animated.Value;
 }) {
+  const scrollRef = useRef<ScrollView>(null);
+  const isUserScrolling = useRef(false);
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const transitioning = Boolean(incomingCaption);
-  const transitioningCurrentToGrayY = transitionAnim.interpolate({
+  const currentToGrayColor = colorAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -LYRICS_SLOT_HEIGHT],
+    outputRange: [brand.white, "rgba(255,255,255,0.5)"],
   });
-  const transitioningCurrentToGrayColor = colorAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [brand.white, "rgba(255,255,255,0.72)"],
-  });
-  const incomingTranslateY = transitionAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [LYRICS_SLOT_HEIGHT, 0],
-  });
-  const incomingOpacity = transitionAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1],
-  });
+
+  // Auto-scroll to bottom when new content arrives, unless user is reading history
+  useEffect(() => {
+    if (!isUserScrolling.current) {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }
+  }, [currentCaption, incomingCaption, history.length]);
+
+  const handleScrollBeginDrag = () => {
+    isUserScrolling.current = true;
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+  };
+
+  const handleScrollEndDrag = () => {
+    // Resume auto-scroll after 5 seconds of inactivity
+    scrollTimeout.current = setTimeout(() => {
+      isUserScrolling.current = false;
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 5000);
+  };
 
   return (
     <View style={styles.captionCard}>
-      <Text style={styles.captionLead}>{leadText}</Text>
-      <View style={styles.captionLyricsArea}>
+      <ScrollView
+        ref={scrollRef}
+        style={styles.transcriptScroll}
+        contentContainerStyle={styles.transcriptContent}
+        showsVerticalScrollIndicator={true}
+        onScrollBeginDrag={handleScrollBeginDrag}
+        onScrollEndDrag={handleScrollEndDrag}
+      >
+        {/* All past captions */}
+        {history.map((line, i) => (
+          <Text key={i} style={styles.transcriptHistoryLine}>
+            {line}
+          </Text>
+        ))}
+
+        {/* Current caption — fades to gray when a new one arrives */}
         {transitioning ? (
-          <Animated.Text
-            numberOfLines={3}
-            style={[
-              styles.captionPreviousLine,
-              {
-                color: transitioningCurrentToGrayColor,
-                transform: [{ translateY: transitioningCurrentToGrayY }],
-              },
-            ]}
-          >
+          <Animated.Text style={[styles.transcriptCurrentLine, { color: currentToGrayColor }]}>
             {currentCaption}
           </Animated.Text>
-        ) : previousCaption ? (
-          <Text numberOfLines={3} style={styles.captionPreviousLineStatic}>
-            {previousCaption}
-          </Text>
-        ) : null}
-
-        {transitioning && incomingCaption ? (
-          <Animated.Text
-            numberOfLines={3}
-            style={[
-              styles.captionCurrentLine,
-              {
-                opacity: incomingOpacity,
-                transform: [{ translateY: incomingTranslateY }],
-              },
-            ]}
-          >
-            {incomingCaption}
-          </Animated.Text>
         ) : (
-          <Text numberOfLines={3} style={styles.captionCurrentLine}>
+          <Text style={styles.transcriptCurrentLine}>
             {currentCaption}
           </Text>
         )}
-      </View>
+
+        {/* Incoming caption (appears below current) */}
+        {transitioning && incomingCaption ? (
+          <Text style={styles.transcriptCurrentLine}>
+            {incomingCaption}
+          </Text>
+        ) : null}
+      </ScrollView>
     </View>
   );
 }
@@ -550,16 +552,14 @@ function TalkDetailScreen({
 function LivePageScreen({
   talk,
   currentCaption,
-  previousCaption,
   incomingCaption,
-  transitionAnim,
+  captionHistory,
   colorAnim,
 }: {
   talk: Talk;
   currentCaption: string;
-  previousCaption: string | null;
   incomingCaption: string | null;
-  transitionAnim: Animated.Value;
+  captionHistory: string[];
   colorAnim: Animated.Value;
 }) {
   const { width } = useWindowDimensions();
@@ -570,26 +570,23 @@ function LivePageScreen({
       backgroundSource={serpentoniBackgrounds[2]}
       desktopBackgroundSource={serpentoniDesktopBackgrounds[2]}
     >
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContainer,
+      <View
+        style={[
+          styles.liveContainer,
           isDesktop && styles.scrollContainerDesktopNarrow,
         ]}
-        showsVerticalScrollIndicator={false}
       >
         <SectionHeader
           title="Live"
-          subtitle={`Now on stage: ${talk.title} by ${talk.speaker}.`}
+          subtitle={`Now on stage: ${talk.title}`}
         />
-        <LiveLyricsPanel
-          leadText={`Traduzione live di ${talk.speaker}`}
+        <LiveTranscriptPanel
           currentCaption={currentCaption}
-          previousCaption={previousCaption}
           incomingCaption={incomingCaption}
-          transitionAnim={transitionAnim}
+          history={captionHistory}
           colorAnim={colorAnim}
         />
-      </ScrollView>
+      </View>
     </PageLayout>
   );
 }
@@ -600,9 +597,10 @@ export default function App() {
   const [view, setView] = useState<AppView>("tabs");
   const [selectedTalk, setSelectedTalk] = useState<Talk>(talks[0]);
   const [liveCaptions, setLiveCaptions] = useState<LiveCaptionState>({
-    current: "Waiting for live transcript...",
+    current: "In attesa della trascrizione live\u2026",
     previous: null,
     incoming: null,
+    history: [],
   });
 
   const transitionAnim = useState(new Animated.Value(0))[0];
@@ -724,6 +722,7 @@ export default function App() {
             previous: prev.current,
             current: prev.incoming,
             incoming: null,
+            history: [...prev.history, prev.current],
           };
         });
         transitionAnim.setValue(0);
@@ -759,9 +758,8 @@ export default function App() {
         <LivePageScreen
           talk={talks[1]}
           currentCaption={liveCaptions.current}
-          previousCaption={liveCaptions.previous}
           incomingCaption={liveCaptions.incoming}
-          transitionAnim={transitionAnim}
+          captionHistory={liveCaptions.history}
           colorAnim={colorAnim}
         />
       );
@@ -770,9 +768,8 @@ export default function App() {
   }, [
     activeTab,
     liveCaptions.current,
-    liveCaptions.previous,
     liveCaptions.incoming,
-    transitionAnim,
+    liveCaptions.history,
     colorAnim,
     openTalkDetail,
   ]);
@@ -1298,9 +1295,35 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.38)",
     backgroundColor: "rgba(255,255,255,0.22)",
-    padding: 20,
-    minHeight: 360,
+    padding: 16,
+    flex: 1,
     overflow: "hidden",
+  },
+  liveContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 110,
+  },
+  transcriptScroll: {
+    flex: 1,
+  },
+  transcriptContent: {
+    paddingBottom: 12,
+  },
+  transcriptHistoryLine: {
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 16,
+    fontWeight: "700",
+    lineHeight: 24,
+    marginBottom: 6,
+  },
+  transcriptCurrentLine: {
+    color: brand.white,
+    fontSize: 16,
+    fontWeight: "700",
+    lineHeight: 24,
+    marginBottom: 6,
   },
   detailCard: {
     borderRadius: 22,
@@ -1340,45 +1363,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "900",
   },
-  captionLead: { color: brand.white, fontWeight: "900", fontSize: 18 },
-  captionLyricsArea: {
-    marginTop: 14,
-    height: LYRICS_SLOT_HEIGHT * 2 + 6,
-    overflow: "hidden",
-    position: "relative",
-  },
-  captionCurrentLine: {
-    color: brand.white,
-    fontSize: 24,
-    fontWeight: "900",
-    lineHeight: 34,
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: LYRICS_SLOT_HEIGHT,
-  },
-  captionPreviousLine: {
-    fontSize: 22,
-    fontWeight: "900",
-    lineHeight: 32,
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: LYRICS_SLOT_HEIGHT,
-  },
-  captionPreviousLineStatic: {
-    color: "rgba(255,255,255,0.72)",
-    fontSize: 22,
-    fontWeight: "900",
-    lineHeight: 32,
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    height: LYRICS_SLOT_HEIGHT,
-  },
+
   sponsorsGrid: {
     marginTop: 8,
     flexDirection: "row",
