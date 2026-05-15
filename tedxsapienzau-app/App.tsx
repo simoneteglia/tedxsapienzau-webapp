@@ -137,18 +137,18 @@ const sponsors: Sponsor[] = [
   { name: "Dotcampus", logo: require("./assets/sponsors/dotcampus.png") },
   { name: "Pioda", logo: require("./assets/sponsors/pioda.png") },
   { name: "Il Parioli", logo: require("./assets/sponsors/IlParioli_ML_Pos_Nero SENZA SFONDO.png") },
-  { name: "Tucano" , logo: require("./assets/sponsors/tucano.png") }, // Testo (il file scaricato è .html)
-  { name: "Famo Cose", logo: require("./assets/sponsors/FAMO COSE LOGO.png")  } // Testo (il file scaricato è .html)
+  { name: "Tucano", logo: require("./assets/sponsors/tucano.png") }, // Testo (il file scaricato è .html)
+  { name: "Famo Cose", logo: require("./assets/sponsors/FAMO COSE LOGO.png") } // Testo (il file scaricato è .html)
 ];
 
 type TabKey = "Talks" | "Sponsors" | "Live";
 type AppView = "tabs" | "talkDetail";
 // ─── Live API configuration ──────────────────────────────────────────────────
-// NOTE: In production, API_KEY must never ship inside the client app.
-// Move consumer-token issuance to a backend proxy and pass only the token here.
-const API_BASE_URL = "ws://localhost:8080";
-const API_KEY = ""; // <-- insert your AUTH_API_KEY here (server-to-server only!)
-const SESSION_ID = ""; // <-- insert the live-session ID created by the backend
+// The webapp fetches consumer tokens and session IDs from the backend proxy.
+// No API_KEY is needed client-side.
+const BACKEND_BASE_URL = "https://tedxsapienzau-hf-live.onrender.com";
+const API_BASE_URL = "https://tedxapi.hyper-foundry.com";
+const LIVE_CAPTION_INTERVAL_MS = 3000; // Buffer captions for 3 seconds before displaying
 // ──────────────────────────────────────────────────────────────────────────────
 const LYRICS_SLOT_HEIGHT = 150;
 const brand = {
@@ -887,8 +887,11 @@ const tabColorPairs: Record<TabKey, { bg: string; active: string }> = {
 };
 
 /**
- * Fetches a short-lived consumer token from the live API, then opens the
- * events WebSocket and forwards translated_text to the onText callback.
+ * Fetches a consumer token and session ID from the backend proxy, then opens
+ * the events WebSocket and forwards translated text to the onText callback.
+ *
+ * Text is buffered for LIVE_CAPTION_INTERVAL_MS (3 s) before being flushed
+ * to the UI, matching the serverTest.js behaviour.
  *
  * The returned function tears down the connection (safe to call multiple times).
  */
@@ -896,46 +899,32 @@ function startLiveConsumer(onText: (text: string) => void): () => void {
   let socket: WebSocket | null = null;
   let stopped = false;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-
-  // Validate config before attempting any network call
-  if (!API_KEY || !SESSION_ID) {
-    console.warn(
-      "[LiveWS] API_KEY or SESSION_ID is not configured. " +
-        "Set the constants at the top of App.tsx to enable live captions.",
-    );
-    return () => {};
-  }
+  let flushTimer: ReturnType<typeof setInterval> | null = null;
+  let textBuffer = "";
 
   async function connect() {
     if (stopped) return;
 
-    // ── 1. Obtain a consumer token ───────────────────────────────────────────
-    let eventsWsUrl: string;
+    // ── 1. Obtain consumer token + session ID from the backend ───────────────
     let consumerToken: string;
+    let sessionId: string;
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/live-sessions/${SESSION_ID}/consumer-tokens`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ ttl_seconds: 900 }),
-        },
-      );
+      const tokenRes = await fetch(`${BACKEND_BASE_URL}/consumer-token`);
+      if (!tokenRes.ok) throw new Error(`consumer-token HTTP ${tokenRes.status}`);
+      const tokenData = await tokenRes.json();
+      consumerToken = tokenData.consumer_token;
 
-      if (!response.ok) {
-        const body = await response.text();
-        throw new Error(`HTTP ${response.status}: ${body}`);
+      const sessionRes = await fetch(`${BACKEND_BASE_URL}/session-id`);
+      if (!sessionRes.ok) throw new Error(`session-id HTTP ${sessionRes.status}`);
+      const sessionData = await sessionRes.json();
+      sessionId = sessionData.session_id;
+
+      if (!consumerToken || !sessionId) {
+        throw new Error("Missing consumerToken or sessionId from backend");
       }
-
-      const data = await response.json();
-      eventsWsUrl = data.events_ws_url as string;
-      consumerToken = data.consumer_token as string;
-      console.log("[LiveWS] Consumer token obtained, connecting to events WS…");
+      console.log(`[LiveWS] Token ottenuto per la sessione: ${sessionId}`);
     } catch (err) {
-      console.error("[LiveWS] Failed to obtain consumer token:", err);
+      console.error("[LiveWS] Errore nel recupero del token dal backend:", err);
       if (!stopped) {
         reconnectTimer = setTimeout(connect, 8000);
       }
@@ -945,12 +934,22 @@ function startLiveConsumer(onText: (text: string) => void): () => void {
     if (stopped) return;
 
     // ── 2. Open the events WebSocket ─────────────────────────────────────────
-    // Append the consumer token as a query parameter
-    const wsUrl = `${eventsWsUrl}?token=${encodeURIComponent(consumerToken)}`;
+    const wsBaseUrl = API_BASE_URL.replace(/^http/, "ws");
+    const wsUrl = `${wsBaseUrl}/v1/live-sessions/${sessionId}/events?token=${encodeURIComponent(consumerToken)}`;
     socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
-      console.log("[LiveWS] Connected to events stream.");
+      console.log("[LiveWS] Connesso allo stream di traduzioni.");
+
+      // Flush the text buffer to the UI every LIVE_CAPTION_INTERVAL_MS
+      flushTimer = setInterval(() => {
+        const trimmed = textBuffer.trim();
+        if (trimmed.length > 0) {
+          console.log(`[LiveWS] Flush buffer → "${trimmed}"`);
+          onText(trimmed);
+          textBuffer = "";
+        }
+      }, LIVE_CAPTION_INTERVAL_MS);
     };
 
     socket.onmessage = (event) => {
@@ -964,40 +963,41 @@ function startLiveConsumer(onText: (text: string) => void): () => void {
           source_text?: string;
         };
 
-        // Only handle translation_final events
+        // Only handle translation_final events — skip ping/pong and everything else
         if (msg.event !== "translation_final") return;
 
         const status = msg.status ?? "ok";
 
-        if (status === "translation_error") {
-          // Service could not produce a translation — skip silently
-          console.warn(
-            "[LiveWS] translation_error received, skipping segment.",
-          );
-          return;
-        }
+        if (status === "translation_error") return; // skip errors silently
 
         // 'ok': use translated_text
-        // 'source_already_target': translated_text mirrors source_text — still display it
-        const text = msg.translated_text ?? msg.source_text ?? "";
+        // 'source_already_target': the spoken language matches target → use source_text
+        const text =
+          status === "source_already_target"
+            ? (msg.source_text ?? "")
+            : (msg.translated_text ?? "");
+
         if (text) {
-          console.log(`[LiveWS] ${status} → "${text}"`);
-          onText(text);
+          textBuffer += text + " ";
         }
       } catch (parseErr) {
-        console.warn("[LiveWS] Could not parse message:", parseErr);
+        console.warn("[LiveWS] Errore nel parsing del messaggio:", parseErr);
       }
     };
 
     socket.onerror = (errorEvent) => {
-      console.error("[LiveWS] WebSocket error:", errorEvent);
+      console.error("[LiveWS] Errore WebSocket:", errorEvent);
     };
 
     socket.onclose = (closeEvent) => {
       console.log(
-        `[LiveWS] Connection closed (code ${closeEvent.code}). Reconnecting in 5s…`,
+        `[LiveWS] Connessione chiusa (code ${closeEvent.code}). Riconnessione in 5s…`,
       );
       socket = null;
+      if (flushTimer !== null) {
+        clearInterval(flushTimer);
+        flushTimer = null;
+      }
       if (!stopped) {
         reconnectTimer = setTimeout(connect, 5000);
       }
@@ -1012,6 +1012,9 @@ function startLiveConsumer(onText: (text: string) => void): () => void {
     stopped = true;
     if (reconnectTimer !== null) {
       clearTimeout(reconnectTimer);
+    }
+    if (flushTimer !== null) {
+      clearInterval(flushTimer);
     }
     if (
       socket &&
