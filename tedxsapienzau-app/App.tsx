@@ -132,13 +132,31 @@ type Sponsor = {
 const sponsors: Sponsor[] = [
   { name: "Unicredit", logo: require("./assets/sponsors/unicredit.jpg"), isLarge: true },
   { name: "Autocentri Balduina", logo: require("./assets/sponsors/autocentri-2.png"), isLarge: true },
+  { name: "Pioda", logo: require("./assets/sponsors/pioda.png") },
+  { name: "Tucano", logo: require("./assets/sponsors/tucano.png") }, // Testo (il file scaricato è .html)
+  { name: "Famo Cose", logo: require("./assets/sponsors/FAMO COSE LOGO.png") }, // Testo (il file scaricato è .html)
+  { name: "Dotcampus", logo: require("./assets/sponsors/dotcampus.png") },
   { name: "Hyper Foundry", logo: require("./assets/sponsors/Hyper-Foundry.png") },
   { name: "Direzione Lavoro", logo: require("./assets/sponsors/direzione-lavoro.png") },
-  { name: "Dotcampus", logo: require("./assets/sponsors/dotcampus.png") },
-  { name: "Pioda", logo: require("./assets/sponsors/pioda.png") },
+  { name: "Big Jellyfish", logo: require("./assets/sponsors/bigjellyfish_colore.png") },
+  { name: "AVIS", logo: require("./assets/sponsors/Avis.png") },
+  { name: "JESAP", logo: require("./assets/sponsors/JESAP.webp") },
+  { name: "Thesis4U", logo: require("./assets/sponsors/Thesis4U.png") },
+  { name: "VAF", logo: require("./assets/sponsors/VAF.png") },
   { name: "Il Parioli", logo: require("./assets/sponsors/IlParioli_ML_Pos_Nero SENZA SFONDO.png") },
-  { name: "Tucano", logo: require("./assets/sponsors/tucano.png") }, // Testo (il file scaricato è .html)
-  { name: "Famo Cose", logo: require("./assets/sponsors/FAMO COSE LOGO.png") } // Testo (il file scaricato è .html)
+  { name: "Radio Sapienza", logo: require("./assets/sponsors/RadioSapienza.png") },
+  { name: "Underpark Radio", logo: require("./assets/sponsors/UPR.png") },
+  { name: "Kortpress", logo: require("./assets/sponsors/Kortpress.png") },
+  { name: "NAM", logo: require("./assets/sponsors/NAM.png") },
+  { name: "Parlamento Europeo", logo: require("./assets/sponsors/PE.jpg") },
+  { name: "Regione Lazio", logo: require("./assets/sponsors/RegioneLazio.webp") },
+  { name: "Commissione Europea", logo: require("./assets/sponsors/CE.webp") },
+  { name: "CNEL", logo: require("./assets/sponsors/CNEL.jpg") },
+  { name: "CNR", logo: require("./assets/sponsors/CNR.webp") },
+  { name: "Città Metropolitana Roma Capitale", logo: require("./assets/sponsors/CMR.png") },
+  { name: "Roma", logo: require("./assets/sponsors/Roma2.png") },
+  { name: "Inps", logo: require("./assets/sponsors/INPS.jpg") },
+  { name: "UNPLI", logo: require("./assets/sponsors/unpli.png") }
 ];
 
 type TabKey = "Talks" | "Sponsors" | "Live";
@@ -747,7 +765,7 @@ export default function App() {
     if (typeof window !== "undefined" && typeof document !== "undefined") {
       let color = brand.black;
       if (isLoading) {
-        color = brand.peach;
+        color = "#63437a"
       } else {
         if (activeTab === "Talks") color = "#9d4172";
         else if (activeTab === "Sponsors") color = "#4c8597";
