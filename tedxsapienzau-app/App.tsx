@@ -743,6 +743,21 @@ export default function App() {
     return stopConsumer;
   }, [transitionAnim, colorAnim]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && typeof document !== "undefined") {
+      let color = brand.black;
+      if (activeTab === "Talks") color = brand.green;
+      else if (activeTab === "Sponsors") color = brand.blue;
+      else if (activeTab === "Live") color = brand.peach;
+
+      document.body.style.backgroundColor = color;
+      const metaThemeColor = document.querySelector("meta[name='theme-color']");
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute("content", color);
+      }
+    }
+  }, [activeTab, view]);
+
   const tabs: Array<{ key: TabKey; icon: keyof typeof Ionicons.glyphMap }> = [
     { key: "Talks", icon: "mic" },
     { key: "Sponsors", icon: "ribbon" },
