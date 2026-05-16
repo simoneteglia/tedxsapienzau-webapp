@@ -746,9 +746,13 @@ export default function App() {
   useEffect(() => {
     if (typeof window !== "undefined" && typeof document !== "undefined") {
       let color = brand.black;
-      if (activeTab === "Talks") color = brand.green;
-      else if (activeTab === "Sponsors") color = brand.blue;
-      else if (activeTab === "Live") color = brand.peach;
+      if (isLoading) {
+        color = brand.peach;
+      } else {
+        if (activeTab === "Talks") color = "#9d4172";
+        else if (activeTab === "Sponsors") color = "#4c8597";
+        else if (activeTab === "Live") color = "#63437a";
+      }
 
       document.body.style.backgroundColor = color;
       const metaThemeColor = document.querySelector("meta[name='theme-color']");
@@ -756,7 +760,7 @@ export default function App() {
         metaThemeColor.setAttribute("content", color);
       }
     }
-  }, [activeTab, view]);
+  }, [activeTab, view, isLoading]);
 
   const tabs: Array<{ key: TabKey; icon: keyof typeof Ionicons.glyphMap }> = [
     { key: "Talks", icon: "mic" },
@@ -808,7 +812,7 @@ export default function App() {
                   {tabs.map((tab) => {
                     const isActive = tab.key === "Talks";
                     const pair = tabColorPairs[tab.key];
-                    const color = brand.white;
+                    const color = isActive ? brand.black : brand.white;
                     return (
                       <View
                         key={tab.key}
@@ -859,7 +863,7 @@ export default function App() {
                 {tabs.map((tab) => {
                   const isActive = activeTab === tab.key;
                   const pair = tabColorPairs[tab.key];
-                  const color = brand.white;
+                  const color = isActive ? brand.black : brand.white;
                   return (
                     <Pressable
                       key={tab.key}
@@ -1395,7 +1399,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.36)",
-    backgroundColor: "rgba(255,255,255,0.18)",
+    backgroundColor: brand.white,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
@@ -1405,7 +1409,7 @@ const styles = StyleSheet.create({
     height: 130,
   },
   sponsorDot: {},
-  sponsorText: { color: brand.white, fontSize: 20, fontWeight: "900" },
+  sponsorText: { color: brand.black, fontSize: 20, fontWeight: "900" },
   tabBarSafeArea: {
     backgroundColor: "transparent",
     position: "absolute",
@@ -1415,12 +1419,12 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.34)",
+    borderTopColor: "rgba(255,255,255,0.15)",
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderLeftColor: "rgba(255,255,255,0.24)",
-    borderRightColor: "rgba(255,255,255,0.24)",
-    backgroundColor: "rgba(255,255,255,0.20)",
+    borderLeftColor: "rgba(255,255,255,0.1)",
+    borderRightColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(0,0,0,0.75)",
     minHeight: 76,
     marginHorizontal: 14,
     marginBottom: 10,
