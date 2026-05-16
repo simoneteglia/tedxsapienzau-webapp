@@ -28,10 +28,7 @@ type Talk = {
   title: string;
   speaker: string;
   time: string;
-  description: string;
   speakerBio: string;
-  lastCaption: string;
-  link?: string;
 };
 
 const talks: Talk[] = [
@@ -40,86 +37,67 @@ const talks: Talk[] = [
     title: "Aurora Ruffino",
     speaker: "Attrice, scrittrice e ricercatrice filosofica",
     time: "Speaker",
-    description: "Attrice, scrittrice e ricercatrice filosofica.",
     speakerBio:
-      "Aurora Ruffino debutta con La solitudine dei numeri primi di Saverio Costanzo. Diplomata al Centro Sperimentale di Cinematografia, recita in Bianca come il latte, rossa come il sangue ed in Braccialetti Rossi. E la sirena di Ninyo di Gabriele Mainetti e protagonista di Noi. Esordisce nel 2024 con il primo romanzo Volevo salvare i colori. Sara Santa Lucia nella prossima produzione di Martin Scorsese.",
-    lastCaption:
-      "Aurora Ruffino debutta con La solitudine dei numeri primi.",
+      "Aurora Ruffino debutta con La solitudine dei numeri primi di Saverio Costanzo. Diplomata al Centro Sperimentale di Cinematografia, recita in Bianca come il latte, rossa come il sangue ed in Braccialetti Rossi. È la sirena di Ninyo di Gabriele Mainetti e protagonista di Noi. Esordisce nel 2024 con il primo romanzo Volevo salvare i colori. Sarà Santa Lucia nella prossima produzione di Martin Scorsese.",
   },
   {
     id: "2",
     title: "Giuliana Mazzoni",
     speaker:
-      "Professore Ordinario di Psicologia in quiescenza, Sapienza Universita di Roma",
+      "Professore Ordinario di Psicologia in quiescenza, Sapienza Università di Roma",
     time: "Speaker",
-    description:
-      "Professore Ordinario di Psicologia in quiescenza, Sapienza Universita di Roma.",
     speakerBio:
-      "Giuliana Mazzoni e nota a livello internazionale per i suoi lavori sulla memoria umana, e in particolare la memoria di avvenimenti personali. Il suo lavoro sulla relazione tra memoria e testimonianza, le potenziali fallacie e le corrette metodologie di ascolto, ha avuto un'importante influenza sul mondo del diritto, soprattutto nei paesi di lingua spagnola e in Italia.",
-    lastCaption:
-      "La memoria umana e al centro del lavoro di Giuliana Mazzoni.",
+      "Giuliana Mazzoni è nota a livello internazionale per i suoi lavori sulla memoria umana (e in particolare la memoria di avvenimenti personali). Il suo lavoro sulla relazione tra memoria e testimonianza, le potenziali fallacie e le corrette metodologie di ascolto, ha avuto un’importante influenza sul mondo del diritto, soprattutto nei paesi di lingua spagnola e in Italia.",
   },
   {
     id: "3",
     title: "Lorenzo Zazzeri",
     speaker: "Atleta professionista",
     time: "Speaker",
-    description: "Atleta professionista.",
     speakerBio:
-      "Lorenzo Zazzeri, nato a Firenze nel 1994, e l'attuale Capitano della Nazionale Italiana di Nuoto. Oltre agli straordinari successi sportivi, ha conseguito con lode la laurea in Scienze Motorie, Sport e Salute e il premio da parte del CONI come \"Atleta Eccellente/Eccellente Studente\" nel 2023. E attualmente iscritto al terzo anno di Belle Arti all'indirizzo \"Arti Visive\" e conduce il Podcast Sportiva-Mente.",
-    lastCaption:
-      "Sport, studio e arti visive si incontrano nel percorso di Lorenzo Zazzeri.",
-    link: "https://www.linkedin.com/in/lorenzo-zazzeri-oly-148b5b292/",
+      "Lorenzo Zazzeri, nato a Firenze (1994), è l'attuale Capitano della Nazionale Italiana di Nuoto. Oltre agli straordinari successi sportivi, ha conseguito con lode la laurea in Scienze Motorie, Sport e Salute e il premio da parte del CONI come 'Atleta Eccellente/Eccellente Studente' nel 2023. È attualmente iscritto al terzo anno di Belle Arti all'indirizzo 'Arti Visive' e conduce il Podcast Sportiva-Mente.",
   },
   {
     id: "4",
     title: "Alessandra Amato & Claudio Cocino",
     speaker:
-      "Etoile e Primo Ballerino del corpo di ballo del Teatro dell'Opera di Roma",
+      "Étoile e Primo Ballerino del corpo di ballo del Teatro dell’Opera di Roma",
     time: "Artists",
-    description:
-      "Etoile e Primo Ballerino del corpo di ballo del Teatro dell'Opera di Roma.",
     speakerBio:
-      "Alessandra Amato e Etoile del Teatro dell'Opera di Roma dal 2016, nominata in seguito ad uno spettacolo de Il lago dei cigni. Consolida negli anni la sua partnership con Claudio Cocino, Primo Ballerino del Teatro dell'Opera di Roma dal 2017, nominato in seguito al balletto La bella addormentata. Nelle loro carriere interpretano i ruoli principali nei piu importanti balletti del repertorio classico e del repertorio dei maggiori coreografi del '900 e contemporanei.",
-    lastCaption:
-      "Alessandra Amato e Claudio Cocino portano in scena il linguaggio della danza.",
+      "Alessandra Amato è Étoile del Teatro dell’Opera di Roma dal 2016, nominata in seguito ad uno spettacolo de Il lago dei cigni. Consolida negli anni la sua partnership con Claudio Cocino, Primo Ballerino del teatro dell’opera di Roma dal 2017, nominato in seguito al balletto La bella addormentata. Nelle loro carriere interpretano i ruoli principali nei più importanti balletti del repertorio classico e del repertorio dei maggiori coreografi del ‘900 e contemporanei.",
   },
   {
     id: "5",
     title: "Cristina Simone",
     speaker:
-      "Professore Ordinario di Economia e Gestione delle Imprese, Sapienza Universita di Roma",
+      "Professore Ordinario di Economia e Gestione delle Imprese, Sapienza Università di Roma",
     time: "Speaker",
-    description:
-      "Professore Ordinario di Economia e Gestione delle Imprese, Sapienza Universita di Roma.",
     speakerBio:
-      "Cristina Simone e un professore ordinario di Economia e Gestione delle Imprese alla Sapienza, dove coordina il PhD in Management, Banking e Commodity Science. Supervisiona il progetto Horizon MSCA-GeoPlaReg. Si occupa di management strategico, sistemi complessi, capitalismo digitale e rapporti impresa-territorio. E Visiting Professor all'ITBA in Argentina.",
-    lastCaption:
-      "Cristina Simone studia management strategico, sistemi complessi e capitalismo digitale.",
+      "Cristina Simone è un professore ordinario di Economia e Gestione delle Imprese alla Sapienza, dove coordina il PhD in Management, Banking e Commodity Science. Supervisiona il progetto Horizon MSCA-GeoPlaReg. Si occupa di management strategico, sistemi complessi, capitalismo digitale e rapporti impresa-territorio. È Visiting Professor all’ITBA in Argentina.",
   },
   {
     id: "6",
     title: "Stefano Magno",
     speaker: "Chirurgo Senologo",
     time: "Speaker",
-    description: "Chirurgo Senologo.",
     speakerBio:
-      "Stefano Magno e un chirurgo senologo e Direttore dell'Unita Operativa Semplice di Terapie Integrate in Senologia presso la Breast Unit della Fondazione Policlinico Gemelli di Roma. E inoltre coordinatore scientifico del Master di I livello in \"Terapie Integrate nelle patologie oncologiche femminili\" e ricopre il ruolo di segretario del Centro di Ricerca e Formazione nelle terapie integrate nelle neoplasie mammarie presso l'Universita Cattolica del Sacro Cuore.",
-    lastCaption:
-      "Stefano Magno lavora sulle terapie integrate in senologia.",
-    link: "https://www.linkedin.com/in/stefano-magno-3b1b03a6/",
+      "Stefano Magno è un chirurgo senologo e Direttore dell’Unità Operativa Semplice di Terapie Integrate in Senologia presso la Breast Unit della Fondazione Policlinico Gemelli di Roma. È inoltre coordinatore scientifico del Master di I livello in “Terapie Integrate nelle patologie oncologiche femminili” e ricopre il ruolo di segretario del Centro di Ricerca e Formazione nelle terapie integrate nelle neoplasie mammarie presso l’Università Cattolica del Sacro Cuore.",
   },
   {
     id: "7",
     title: "Guido Chiefalo",
     speaker: "Designer e Professore",
     time: "Speaker",
-    description: "Designer e Professore.",
     speakerBio:
-      "Guido Chiefalo e un designer nato a Roma nel 1986, opera nel campo della comunicazione visiva e della brand strategy. Attualmente ricopre il ruolo di Art Director alla FAO, Nazioni Unite, ed insegna \"Brand Design\" alla Sapienza Universita di Roma, DCVM. Ha lavorato tra Milano, Londra e Roma, collaborando con agenzie come INAREA, McCann, Slamp e Soda Studio.",
-    lastCaption:
-      "Guido Chiefalo lavora tra comunicazione visiva e brand strategy.",
-    link: "https://www.guifol.com",
+      "Guido Chiefalo è un designer nato a Roma nel 1986, opera nel campo della comunicazione visiva e della brand strategy. Attualmente ricopre il ruolo di Art Director alla FAO (Nazioni Unite) ed insegna “Brand Design” alla Sapienza Università di Roma (DCVM). Ha lavorato tra Milano, Londra e Roma, collaborando con agenzie come INAREA, McCann, Slamp e Soda Studio.",
+  },
+  {
+    id: "8",
+    title: "Carolina Venosi",
+    speaker: "Imprenditrice e Consulente,  founder di Rome is More e Domenica Italiana",
+    time: "Speaker",
+    speakerBio:
+      "Carolina Venosi è consulente per startup e imprenditrice, nata e cresciuta a Roma. Dopo dieci anni di lavoro in aziende e agenzie di comunicazione, ha fondato il brand Rome is More, nato sui social media nel 2018, che spiega in modo ironico e divertente il dialetto e la cultura romanesca e che oggi è una start-up in crescita con uno store fisico e un'agenzia creativa tutta al femminile.",
   },
 ];
 
@@ -534,7 +512,7 @@ function TalkDetailScreen({
           <Text style={styles.backButtonText}>Back to talks</Text>
         </Pressable>
 
-        <SectionHeader title={talk.title} subtitle={talk.description} />
+        <SectionHeader title={talk.title} subtitle={talk.speaker} />
 
         {/* <View style={styles.liveImageWrap}>
           <Image
@@ -548,19 +526,8 @@ function TalkDetailScreen({
         </View> */}
 
         <View style={styles.detailCard}>
-          <Text style={styles.detailCardTitle}>Profilo</Text>
-          <Text style={styles.detailCardText}>{talk.description}</Text>
           <Text style={styles.detailCardTitle}>Bio</Text>
           <Text style={styles.detailCardText}>{talk.speakerBio}</Text>
-          {talk.link ? (
-            <Pressable
-              style={styles.profileLinkButton}
-              onPress={() => Linking.openURL(talk.link as string)}
-            >
-              <Ionicons name="open-outline" size={16} color={brand.white} />
-              <Text style={styles.profileLinkText}>Link pubblico</Text>
-            </Pressable>
-          ) : null}
         </View>
       </ScrollView>
     </PageLayout>
@@ -596,7 +563,7 @@ function LivePageScreen({
       >
         <SectionHeader
           title="Live"
-          subtitle={`Now on stage: ${talk.title}`}
+          subtitle={`Now on stage: ${talk.title}`} //da modificare 
         />
         <LiveTranscriptPanel
           currentCaption={currentCaption}
