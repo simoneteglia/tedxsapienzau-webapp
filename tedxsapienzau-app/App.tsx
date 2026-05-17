@@ -37,8 +37,9 @@ const talks: Talk[] = [
     title: "Aurora Ruffino",
     speaker: "Attrice, scrittrice e ricercatrice filosofica ",
     time: "Artist",
-    speakerBio:"Aurora Ruffino debutta con La solitudine dei numeri primi di Saverio Costanzo. Diplomata al Centro Sperimentale di Cinematografia, recita in Bianca come il latte, rossa come il sangue ed in Braccialetti Rossi. È la sirena di Ninyo di Gabriele Mainetti e protagonista di Noi. Esordisce nel 2024 con il primo romanzo Volevo salvare i colori. Sarà Santa Lucia nella prossima produzione di Martin Scorsese. " 
-   },
+    speakerBio:
+      "Aurora Ruffino debutta con La solitudine dei numeri primi di Saverio Costanzo. Diplomata al Centro Sperimentale di Cinematografia, recita in Bianca come il latte, rossa come il sangue ed in Braccialetti Rossi. È la sirena di Ninyo di Gabriele Mainetti e protagonista di Noi. Esordisce nel 2024 con il primo romanzo Volevo salvare i colori. Sarà Santa Lucia nella prossima produzione di Martin Scorsese. ",
+  },
   {
     id: "2",
     title: "Giuliana Mazzoni",
@@ -85,7 +86,8 @@ const talks: Talk[] = [
   {
     id: "7",
     title: "Guido Chiefalo",
-    speaker: "Designer, Art DIrector ℅ FAO e Professore di Brand Design, Sapienza Università di Roma ",
+    speaker:
+      "Designer, Art DIrector ℅ FAO e Professore di Brand Design, Sapienza Università di Roma ",
     time: "Speaker",
     speakerBio:
       "Guido Chiefalo é un designer nato a Roma nel 1986, opera nel campo della comunicazione visiva e della brand strategy. Attualmente ricopre il ruolo di Art Director alla FAO (Nazioni Unite) ed insegna “Brand Design” alla Sapienza Università di Roma (DCVM). Ha lavorato tra Milano, Londra e Roma, collaborando con agenzie come INAREA, McCann, Slamp e Soda Studio. ",
@@ -93,7 +95,8 @@ const talks: Talk[] = [
   {
     id: "8",
     title: "Carolina Venosi",
-    speaker: " Imprenditrice e Consulente, founder di Rome is More e Domenica Italiana ",
+    speaker:
+      " Imprenditrice e Consulente, founder di Rome is More e Domenica Italiana ",
     time: "Speaker",
     speakerBio:
       "Carolina Venosi è consulente per startup e imprenditrice, nata e cresciuta a Roma. Dopo dieci anni di lavoro in aziende e agenzie di comunicazione, ha fondato il brand Rome is More, nato sui social media nel 2018, che spiega in modo ironico e divertente il dialetto e la cultura romanesca e che oggi è una start-up in crescita con uno store fisico e un'agenzia creativa tutta al femminile. ",
@@ -107,36 +110,65 @@ type Sponsor = {
 };
 
 const sponsors: Sponsor[] = [
-  { name: "Unicredit", logo: require("./assets/sponsors/unicredit.jpg"), isLarge: true },
-  { name: "Autocentri Balduina", logo: require("./assets/sponsors/autocentri-2.png"), isLarge: true },
+  {
+    name: "Unicredit",
+    logo: require("./assets/sponsors/unicredit.jpg"),
+    isLarge: true,
+  },
+  {
+    name: "Autocentri Balduina",
+    logo: require("./assets/sponsors/autocentri-2.png"),
+    isLarge: true,
+  },
   { name: "Pioda", logo: require("./assets/sponsors/pioda.png") },
   { name: "Tucano", logo: require("./assets/sponsors/tucano.png") }, // Testo (il file scaricato è .html)
   { name: "Famo Cose", logo: require("./assets/sponsors/FAMO COSE LOGO.png") }, // Testo (il file scaricato è .html)
   { name: "Dotcampus", logo: require("./assets/sponsors/dotcampus.png") },
-  { name: "Hyper Foundry", logo: require("./assets/sponsors/Hyper-Foundry.png") },
-  { name: "Direzione Lavoro", logo: require("./assets/sponsors/direzione-lavoro.png") },
-  { name: "Big Jellyfish", logo: require("./assets/sponsors/bigjellyfish_colore.png") },
+  {
+    name: "Hyper Foundry",
+    logo: require("./assets/sponsors/Hyper-Foundry.png"),
+  },
+  {
+    name: "Direzione Lavoro",
+    logo: require("./assets/sponsors/direzione-lavoro.png"),
+  },
+  {
+    name: "Big Jellyfish",
+    logo: require("./assets/sponsors/bigjellyfish_colore.png"),
+  },
   { name: "AVIS", logo: require("./assets/sponsors/Avis.png") },
   { name: "JESAP", logo: require("./assets/sponsors/JESAP.webp") },
   { name: "Thesis4U", logo: require("./assets/sponsors/Thesis4U.png") },
   { name: "VAF", logo: require("./assets/sponsors/VAF.png") },
-  { name: "Il Parioli", logo: require("./assets/sponsors/IlParioli_ML_Pos_Nero SENZA SFONDO.png") },
-  { name: "Radio Sapienza", logo: require("./assets/sponsors/RadioSapienza.png") },
+  {
+    name: "Il Parioli",
+    logo: require("./assets/sponsors/IlParioli_ML_Pos_Nero SENZA SFONDO.png"),
+  },
+  {
+    name: "Radio Sapienza",
+    logo: require("./assets/sponsors/RadioSapienza.png"),
+  },
   { name: "Underpark Radio", logo: require("./assets/sponsors/UPR.png") },
   { name: "Kortpress", logo: require("./assets/sponsors/Kortpress.png") },
   { name: "NAM", logo: require("./assets/sponsors/NAM.png") },
   { name: "Parlamento Europeo", logo: require("./assets/sponsors/PE.jpg") },
-  { name: "Regione Lazio", logo: require("./assets/sponsors/RegioneLazio.webp") },
+  {
+    name: "Regione Lazio",
+    logo: require("./assets/sponsors/RegioneLazio.webp"),
+  },
   { name: "Commissione Europea", logo: require("./assets/sponsors/CE.webp") },
   { name: "CNEL", logo: require("./assets/sponsors/CNEL.jpg") },
   { name: "CNR", logo: require("./assets/sponsors/CNR.webp") },
-  { name: "Città Metropolitana Roma Capitale", logo: require("./assets/sponsors/CMR.png") },
+  {
+    name: "Città Metropolitana Roma Capitale",
+    logo: require("./assets/sponsors/CMR.png"),
+  },
   { name: "Roma", logo: require("./assets/sponsors/Roma2.png") },
   { name: "Inps", logo: require("./assets/sponsors/INPS.jpg") },
-  { name: "UNPLI", logo: require("./assets/sponsors/unpli.png") }
+  { name: "UNPLI", logo: require("./assets/sponsors/unpli.png") },
 ];
 
-type TabKey = "Talks" | "Sponsors" | "Live";
+type TabKey = "Guests" | "Sponsors" | "Live";
 type AppView = "tabs" | "talkDetail";
 // ─── Live API configuration ──────────────────────────────────────────────────
 // The webapp fetches consumer tokens and session IDs from the backend proxy.
@@ -312,7 +344,7 @@ function TalksScreen({ onOpenLive }: { onOpenLive: (talk: Talk) => void }) {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <SectionHeader title="Talks" subtitle="" />
+        <SectionHeader title="Guests" subtitle="" />
 
         <View style={[styles.talksGrid, isDesktop && styles.talksGridDesktop]}>
           {talks.map((talk, index) => (
@@ -386,9 +418,9 @@ function SponsorsScreen() {
                 // Logica per fare Unicredit e Balduina più grandi!
                 sponsor.isLarge && {
                   width: isDesktop ? "48%" : "100%", // Più larghi
-                  minHeight: isDesktop ? 180 : 150,  // Più alti
+                  minHeight: isDesktop ? 180 : 150, // Più alti
                   borderColor: "rgba(255,255,255,0.7)", // Bordo più luminoso
-                }
+                },
               ]}
             >
               {sponsor.logo ? (
@@ -467,20 +499,21 @@ function LiveTranscriptPanel({
 
         {/* Current caption — fades to gray when a new one arrives */}
         {transitioning ? (
-          <Animated.Text style={[styles.transcriptCurrentLine, { color: currentToGrayColor }]}>
+          <Animated.Text
+            style={[
+              styles.transcriptCurrentLine,
+              { color: currentToGrayColor },
+            ]}
+          >
             {currentCaption}
           </Animated.Text>
         ) : (
-          <Text style={styles.transcriptCurrentLine}>
-            {currentCaption}
-          </Text>
+          <Text style={styles.transcriptCurrentLine}>{currentCaption}</Text>
         )}
 
         {/* Incoming caption (appears below current) */}
         {transitioning && incomingCaption ? (
-          <Text style={styles.transcriptCurrentLine}>
-            {incomingCaption}
-          </Text>
+          <Text style={styles.transcriptCurrentLine}>{incomingCaption}</Text>
         ) : null}
       </ScrollView>
     </View>
@@ -508,7 +541,7 @@ function TalkDetailScreen({
       >
         <Pressable style={styles.backButton} onPress={onBack}>
           <Ionicons name="arrow-back" size={16} color={brand.white} />
-          <Text style={styles.backButtonText}>Back to talks</Text>
+          <Text style={styles.backButtonText}>Back to guests</Text>
         </Pressable>
 
         <SectionHeader title={talk.title} subtitle={talk.speaker} />
@@ -562,7 +595,7 @@ function LivePageScreen({
       >
         <SectionHeader
           title="Live"
-          subtitle={`Now on stage: ${talk.title}`} //da modificare 
+          subtitle={`Now on stage: ${talk.title}`} //da modificare
         />
         <LiveTranscriptPanel
           currentCaption={currentCaption}
@@ -577,7 +610,7 @@ function LivePageScreen({
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabKey>("Talks");
+  const [activeTab, setActiveTab] = useState<TabKey>("Guests");
   const [view, setView] = useState<AppView>("tabs");
   const [selectedTalk, setSelectedTalk] = useState<Talk>(talks[0]);
   const [liveCaptions, setLiveCaptions] = useState<LiveCaptionState>({
@@ -662,7 +695,7 @@ export default function App() {
   const goBackToTalks = useCallback(() => {
     transitionScreen(() => {
       setView("tabs");
-      setActiveTab("Talks");
+      setActiveTab("Guests");
     });
   }, [transitionScreen]);
 
@@ -731,9 +764,9 @@ export default function App() {
     if (typeof window !== "undefined" && typeof document !== "undefined") {
       let color = brand.black;
       if (isLoading) {
-        color = "#63437a"
+        color = "#63437a";
       } else {
-        if (activeTab === "Talks") color = "#9d4172";
+        if (activeTab === "Guests") color = "#9d4172";
         else if (activeTab === "Sponsors") color = "#4c8597";
         else if (activeTab === "Live") color = "#63437a";
       }
@@ -747,7 +780,7 @@ export default function App() {
   }, [activeTab, view, isLoading]);
 
   const tabs: Array<{ key: TabKey; icon: keyof typeof Ionicons.glyphMap }> = [
-    { key: "Talks", icon: "mic" },
+    { key: "Guests", icon: "mic" },
     { key: "Sponsors", icon: "ribbon" },
     { key: "Live", icon: "radio" },
   ];
@@ -794,7 +827,7 @@ export default function App() {
               <SafeAreaView style={styles.tabBarSafeArea}>
                 <View style={styles.tabBar}>
                   {tabs.map((tab) => {
-                    const isActive = tab.key === "Talks";
+                    const isActive = tab.key === "Guests";
                     const pair = tabColorPairs[tab.key];
                     const color = isActive ? brand.black : brand.white;
                     return (
@@ -806,11 +839,7 @@ export default function App() {
                           isActive && { backgroundColor: pair.bg },
                         ]}
                       >
-                        <View
-                          style={[
-                            styles.tabIconBadge,
-                          ]}
-                        >
+                        <View style={[styles.tabIconBadge]}>
                           <Ionicons name={tab.icon} size={17} color={color} />
                         </View>
                         <Text style={[styles.tabLabel, { color }]}>
@@ -858,11 +887,7 @@ export default function App() {
                       ]}
                       onPress={() => navigateToTab(tab.key)}
                     >
-                      <View
-                        style={[
-                          styles.tabIconBadge,
-                        ]}
-                      >
+                      <View style={[styles.tabIconBadge]}>
                         <Ionicons name={tab.icon} size={17} color={color} />
                       </View>
                       <Text style={[styles.tabLabel, { color }]}>
@@ -881,7 +906,7 @@ export default function App() {
 }
 
 const tabColorPairs: Record<TabKey, { bg: string; active: string }> = {
-  Talks: { bg: brand.green, active: brand.pink },
+  Guests: { bg: brand.green, active: brand.pink },
   Sponsors: { bg: brand.blue, active: brand.yellow },
   Live: { bg: brand.peach, active: brand.purple },
 };
@@ -910,12 +935,14 @@ function startLiveConsumer(onText: (text: string) => void): () => void {
     let sessionId: string;
     try {
       const tokenRes = await fetch(`${BACKEND_BASE_URL}/consumer-token`);
-      if (!tokenRes.ok) throw new Error(`consumer-token HTTP ${tokenRes.status}`);
+      if (!tokenRes.ok)
+        throw new Error(`consumer-token HTTP ${tokenRes.status}`);
       const tokenData = await tokenRes.json();
       consumerToken = tokenData.consumer_token;
 
       const sessionRes = await fetch(`${BACKEND_BASE_URL}/session-id`);
-      if (!sessionRes.ok) throw new Error(`session-id HTTP ${sessionRes.status}`);
+      if (!sessionRes.ok)
+        throw new Error(`session-id HTTP ${sessionRes.status}`);
       const sessionData = await sessionRes.json();
       sessionId = sessionData.session_id;
 
