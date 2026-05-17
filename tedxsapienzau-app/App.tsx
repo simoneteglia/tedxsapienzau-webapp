@@ -35,11 +35,10 @@ const talks: Talk[] = [
   {
     id: "1",
     title: "Aurora Ruffino",
-    speaker: "Attrice, scrittrice e ricercatrice filosofica",
-    time: "Speaker",
-    speakerBio:
-      "Aurora Ruffino debutta con La solitudine dei numeri primi di Saverio Costanzo. Diplomata al Centro Sperimentale di Cinematografia, recita in Bianca come il latte, rossa come il sangue ed in Braccialetti Rossi. È la sirena di Ninyo di Gabriele Mainetti e protagonista di Noi. Esordisce nel 2024 con il primo romanzo Volevo salvare i colori. Sarà Santa Lucia nella prossima produzione di Martin Scorsese.",
-  },
+    speaker: "Attrice, scrittrice e ricercatrice filosofica ",
+    time: "Artist",
+    speakerBio:"Aurora Ruffino debutta con La solitudine dei numeri primi di Saverio Costanzo. Diplomata al Centro Sperimentale di Cinematografia, recita in Bianca come il latte, rossa come il sangue ed in Braccialetti Rossi. È la sirena di Ninyo di Gabriele Mainetti e protagonista di Noi. Esordisce nel 2024 con il primo romanzo Volevo salvare i colori. Sarà Santa Lucia nella prossima produzione di Martin Scorsese. " 
+   },
   {
     id: "2",
     title: "Giuliana Mazzoni",
@@ -47,7 +46,7 @@ const talks: Talk[] = [
       "Professore Ordinario di Psicologia in quiescenza, Sapienza Università di Roma",
     time: "Speaker",
     speakerBio:
-      "Giuliana Mazzoni è nota a livello internazionale per i suoi lavori sulla memoria umana (e in particolare la memoria di avvenimenti personali). Il suo lavoro sulla relazione tra memoria e testimonianza, le potenziali fallacie e le corrette metodologie di ascolto, ha avuto un’importante influenza sul mondo del diritto, soprattutto nei paesi di lingua spagnola e in Italia.",
+      "Giuliana Mazzoni è nota a livello internazionale per i suoi lavori sulla memoria umana (e in particolare la memoria di avvenimenti personali). Il suo lavoro sulla relazione tra memoria e testimonianza, le potenziali fallacie e le corrette metodologie di ascolto, ha avuto un’importante influenza sul mondo del diritto, soprattutto nei paesi di lingua spagnola e in Italia. ",
   },
   {
     id: "3",
@@ -55,16 +54,16 @@ const talks: Talk[] = [
     speaker: "Atleta professionista",
     time: "Speaker",
     speakerBio:
-      "Lorenzo Zazzeri, nato a Firenze (1994), è l'attuale Capitano della Nazionale Italiana di Nuoto. Oltre agli straordinari successi sportivi, ha conseguito con lode la laurea in Scienze Motorie, Sport e Salute e il premio da parte del CONI come 'Atleta Eccellente/Eccellente Studente' nel 2023. È attualmente iscritto al terzo anno di Belle Arti all'indirizzo 'Arti Visive' e conduce il Podcast Sportiva-Mente.",
+      "Lorenzo Zazzeri, nato a Firenze (1994), è l'attuale Capitano della Nazionale Italiana di Nuoto. Oltre agli straordinari successi sportivi, ha conseguito con lode la laurea in Scienze Motorie, Sport e Salute e il premio da parte del CONI come 'Atleta Eccellente/Eccellente Studente' nel 2023. È attualmente iscritto al terzo anno di Belle Arti all'indirizzo 'Arti Visive' e conduce il Podcast Sportiva-Mente. ",
   },
   {
     id: "4",
     title: "Alessandra Amato & Claudio Cocino",
     speaker:
-      "Étoile e Primo Ballerino del corpo di ballo del Teatro dell’Opera di Roma",
+      " Étoile e Primo Ballerino del corpo di ballo del Teatro dell’Opera di Roma ",
     time: "Artists",
     speakerBio:
-      "Alessandra Amato è Étoile del Teatro dell’Opera di Roma dal 2016, nominata in seguito ad uno spettacolo de Il lago dei cigni. Consolida negli anni la sua partnership con Claudio Cocino, Primo Ballerino del teatro dell’opera di Roma dal 2017, nominato in seguito al balletto La bella addormentata. Nelle loro carriere interpretano i ruoli principali nei più importanti balletti del repertorio classico e del repertorio dei maggiori coreografi del ‘900 e contemporanei.",
+      "Alessandra Amato è Étoile del Teatro dell’Opera di Roma dal 2016, nominata in seguito ad uno spettacolo de Il lago dei cigni. Consolida negli anni la sua partnership con Claudio Cocino, Primo Ballerino del teatro dell’opera di Roma dal 2017, nominato in seguito al balletto La bella addormentata. Nelle loro carriere interpretano i ruoli principali nei più importanti balletti del repertorio classico e del repertorio dei maggiori coreografi del ‘900 e contemporanei. ",
   },
   {
     id: "5",
@@ -73,31 +72,31 @@ const talks: Talk[] = [
       "Professore Ordinario di Economia e Gestione delle Imprese, Sapienza Università di Roma",
     time: "Speaker",
     speakerBio:
-      "Cristina Simone è un professore ordinario di Economia e Gestione delle Imprese alla Sapienza, dove coordina il PhD in Management, Banking e Commodity Science. Supervisiona il progetto Horizon MSCA-GeoPlaReg. Si occupa di management strategico, sistemi complessi, capitalismo digitale e rapporti impresa-territorio. È Visiting Professor all’ITBA in Argentina.",
+      "Cristina Simone è un professore ordinario di Economia e Gestione delle Imprese alla Sapienza, dove coordina il PhD in Management, Banking e Commodity Science. Supervisiona il progetto Horizon MSCA-GeoPlaReg. Si occupa di management strategico, sistemi complessi, capitalismo digitale e rapporti impresa-territorio. È stata Visiting Professor all’ITBA in Argentina. ",
   },
   {
     id: "6",
     title: "Stefano Magno",
-    speaker: "Chirurgo Senologo",
+    speaker: "Chirurgo Senologo, Policlinico Univ. Gemelli di Roma ",
     time: "Speaker",
     speakerBio:
-      "Stefano Magno è un chirurgo senologo e Direttore dell’Unità Operativa Semplice di Terapie Integrate in Senologia presso la Breast Unit della Fondazione Policlinico Gemelli di Roma. È inoltre coordinatore scientifico del Master di I livello in “Terapie Integrate nelle patologie oncologiche femminili” e ricopre il ruolo di segretario del Centro di Ricerca e Formazione nelle terapie integrate nelle neoplasie mammarie presso l’Università Cattolica del Sacro Cuore.",
+      "Stefano Magno è un chirurgo senologo e Direttore dell’Unità Operativa Semplice di Terapie Integrate in Senologia presso la Breast Unit della Fondazione Policlinico Gemelli di Roma. È inoltre coordinatore scientifico del Master di I livello in “Terapie Integrate nelle patologie oncologiche femminili” e ricopre il ruolo di segretario del Centro di Ricerca e Formazione nelle terapie integrate nelle neoplasie mammarie presso l’Università Cattolica del Sacro Cuore. ",
   },
   {
     id: "7",
     title: "Guido Chiefalo",
-    speaker: "Designer e Professore",
+    speaker: "Designer, Art DIrector ℅ FAO e Professore di Brand Design, Sapienza Università di Roma ",
     time: "Speaker",
     speakerBio:
-      "Guido Chiefalo è un designer nato a Roma nel 1986, opera nel campo della comunicazione visiva e della brand strategy. Attualmente ricopre il ruolo di Art Director alla FAO (Nazioni Unite) ed insegna “Brand Design” alla Sapienza Università di Roma (DCVM). Ha lavorato tra Milano, Londra e Roma, collaborando con agenzie come INAREA, McCann, Slamp e Soda Studio.",
+      "Guido Chiefalo é un designer nato a Roma nel 1986, opera nel campo della comunicazione visiva e della brand strategy. Attualmente ricopre il ruolo di Art Director alla FAO (Nazioni Unite) ed insegna “Brand Design” alla Sapienza Università di Roma (DCVM). Ha lavorato tra Milano, Londra e Roma, collaborando con agenzie come INAREA, McCann, Slamp e Soda Studio. ",
   },
   {
     id: "8",
     title: "Carolina Venosi",
-    speaker: "Imprenditrice e Consulente,  founder di Rome is More e Domenica Italiana",
+    speaker: " Imprenditrice e Consulente, founder di Rome is More e Domenica Italiana ",
     time: "Speaker",
     speakerBio:
-      "Carolina Venosi è consulente per startup e imprenditrice, nata e cresciuta a Roma. Dopo dieci anni di lavoro in aziende e agenzie di comunicazione, ha fondato il brand Rome is More, nato sui social media nel 2018, che spiega in modo ironico e divertente il dialetto e la cultura romanesca e che oggi è una start-up in crescita con uno store fisico e un'agenzia creativa tutta al femminile.",
+      "Carolina Venosi è consulente per startup e imprenditrice, nata e cresciuta a Roma. Dopo dieci anni di lavoro in aziende e agenzie di comunicazione, ha fondato il brand Rome is More, nato sui social media nel 2018, che spiega in modo ironico e divertente il dialetto e la cultura romanesca e che oggi è una start-up in crescita con uno store fisico e un'agenzia creativa tutta al femminile. ",
   },
 ];
 
