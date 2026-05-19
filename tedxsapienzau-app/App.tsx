@@ -925,6 +925,7 @@ function startLiveConsumer(onText: (text: string) => void): () => void {
   let stopped = false;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   let flushTimer: ReturnType<typeof setInterval> | null = null;
+  let sessionCheckTimer: ReturnType<typeof setInterval> | null = null; // 👈 Nuova variabile
   let textBuffer = "";
 
   async function connect() {
@@ -965,6 +966,24 @@ function startLiveConsumer(onText: (text: string) => void): () => void {
     const wsUrl = `${wsBaseUrl}/v1/live-sessions/${sessionId}/events?token=${encodeURIComponent(consumerToken)}`;
     socket = new WebSocket(wsUrl);
 
+    sessionCheckTimer = setInterval(async () => {
+      try {
+        const checkRes = await fetch(`${BACKEND_BASE_URL}/session-id`);
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          // Se l'ID remoto è diverso da quello a cui siamo connessi...
+          if (checkData.session_id && checkData.session_id !== sessionId) {
+            console.log("🔄 La regia ha cambiato lingua! Riconnessione in corso...");
+            clearInterval(sessionCheckTimer!);
+            if (socket) socket.close(); // 👈 Forzare la chiusura fa ripartire connect() automaticamente!
+          }
+        }
+      } catch (err) {
+        // Ignora errori di rete temporanei
+      }
+    }, 5000);
+    // 🟢 FINE BLOCCO
+    
     socket.onopen = () => {
       console.log("[LiveWS] Connesso allo stream di traduzioni.");
 
@@ -1017,37 +1036,26 @@ function startLiveConsumer(onText: (text: string) => void): () => void {
     };
 
     socket.onclose = (closeEvent) => {
-      console.log(
-        `[LiveWS] Connessione chiusa (code ${closeEvent.code}). Riconnessione in 5s…`,
-      );
+      console.log(`[LiveWS] Connessione chiusa (code ${closeEvent.code}). Riconnessione in 5s…`);
       socket = null;
-      if (flushTimer !== null) {
-        clearInterval(flushTimer);
-        flushTimer = null;
-      }
+      if (flushTimer !== null) clearInterval(flushTimer);
+      if (sessionCheckTimer !== null) clearInterval(sessionCheckTimer); // 👈 Puliamo il radar
+      
       if (!stopped) {
         reconnectTimer = setTimeout(connect, 5000);
       }
     };
   }
 
-  // Kick off the first connection attempt
   connect();
 
   // Return a teardown function
   return () => {
     stopped = true;
-    if (reconnectTimer !== null) {
-      clearTimeout(reconnectTimer);
-    }
-    if (flushTimer !== null) {
-      clearInterval(flushTimer);
-    }
-    if (
-      socket &&
-      (socket.readyState === WebSocket.OPEN ||
-        socket.readyState === WebSocket.CONNECTING)
-    ) {
+    if (reconnectTimer !== null) clearTimeout(reconnectTimer);
+    if (flushTimer !== null) clearInterval(flushTimer);
+    if (sessionCheckTimer !== null) clearInterval(sessionCheckTimer); // 👈 Puliamo il radar
+    if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
       socket.close();
     }
   };
