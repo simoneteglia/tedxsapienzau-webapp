@@ -5,6 +5,7 @@ import {
   Easing,
   Image,
   Linking,
+  Modal,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -61,8 +62,8 @@ const talks: Talk[] = [
     id: "4",
     title: "Alessandra Amato & Claudio Cocino",
     speaker:
-      " Étoile e Primo Ballerino del corpo di ballo del Teatro dell’Opera di Roma ",
-    time: "Artists",
+      "Étoile e Primo Ballerino del corpo di ballo del Teatro dell’Opera di Roma ",
+    time: "Artist",
     speakerBio:
       "Alessandra Amato è Étoile del Teatro dell’Opera di Roma dal 2016, nominata in seguito ad uno spettacolo de Il lago dei cigni. Consolida negli anni la sua partnership con Claudio Cocino, Primo Ballerino del teatro dell’opera di Roma dal 2017, nominato in seguito al balletto La bella addormentata. Nelle loro carriere interpretano i ruoli principali nei più importanti balletti del repertorio classico e del repertorio dei maggiori coreografi del ‘900 e contemporanei. ",
   },
@@ -96,7 +97,7 @@ const talks: Talk[] = [
     id: "8",
     title: "Carolina Venosi",
     speaker:
-      " Imprenditrice e Consulente, founder di Rome is More e Domenica Italiana ",
+      "Imprenditrice e Consulente, founder di Rome is More e Domenica Italiana ",
     time: "Speaker",
     speakerBio:
       "Carolina Venosi è consulente per startup e imprenditrice, nata e cresciuta a Roma. Dopo dieci anni di lavoro in aziende e agenzie di comunicazione, ha fondato il brand Rome is More, nato sui social media nel 2018, che spiega in modo ironico e divertente il dialetto e la cultura romanesca e che oggi è una start-up in crescita con uno store fisico e un'agenzia creativa tutta al femminile. ",
@@ -344,7 +345,7 @@ function TalksScreen({ onOpenLive }: { onOpenLive: (talk: Talk) => void }) {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <SectionHeader title="Guests" subtitle="" />
+        <SectionHeader title="Guests" subtitle="I protagonisti di questa edizione." />
 
         <View style={[styles.talksGrid, isDesktop && styles.talksGridDesktop]}>
           {talks.map((talk, index) => (
@@ -404,7 +405,7 @@ function SponsorsScreen() {
       >
         <SectionHeader
           title="Sponsors"
-          subtitle="Partners and brands supporting TEDxSapienzaU."
+          subtitle="Partners e patrocini che ci sostengono."
         />
         <View
           style={[styles.sponsorsGrid, isDesktop && styles.sponsorsGridDesktop]}
@@ -581,6 +582,22 @@ function LivePageScreen({
 }) {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
+  const [showInfoPopup, setShowInfoPopup] = useState(() => {
+    try {
+      return localStorage.getItem("tedx_live_popup_dismissed") !== "true";
+    } catch {
+      return true;
+    }
+  });
+
+  const dismissPopup = useCallback(() => {
+    setShowInfoPopup(false);
+    try {
+      localStorage.setItem("tedx_live_popup_dismissed", "true");
+    } catch {
+      // ignore
+    }
+  }, []);
 
   return (
     <PageLayout
@@ -595,7 +612,7 @@ function LivePageScreen({
       >
         <SectionHeader
           title="Live"
-          subtitle={`Now on stage: ${talk.title}`} //da modificare
+          subtitle="Segui in tempo reale la traduzione del talk."
         />
         <LiveTranscriptPanel
           currentCaption={currentCaption}
@@ -604,7 +621,150 @@ function LivePageScreen({
           colorAnim={colorAnim}
         />
       </View>
+
+      <Modal
+        visible={showInfoPopup}
+        transparent
+        animationType="fade"
+        onRequestClose={dismissPopup}
+      >
+        <View style={styles.infoPopupOverlay}>
+          <View style={[styles.infoPopupCard, isDesktop && styles.infoPopupCardDesktop]}>
+            <Text style={styles.infoPopupTitle}>🎙️ Live</Text>
+            <Text style={styles.infoPopupText}>
+              Qui puoi seguire in tempo reale la traduzione di ciò che viene detto sul palco.
+            </Text>
+            <Text style={styles.infoPopupText}>
+              Il testo apparirà automaticamente e si aggiornerà ogni pochi secondi. Puoi rileggere il testo precedente scorrendo il testo.
+            </Text>
+            <Text style={styles.infoPopupText}>
+              Resta su questa pagina per non perdere nulla!
+            </Text>
+            <Pressable
+              style={styles.infoPopupButton}
+              onPress={dismissPopup}
+            >
+              <Text style={styles.infoPopupButtonText}>OK!</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </PageLayout>
+  );
+}
+
+function LiquidGlassTabBar({
+  tabs,
+  activeTab,
+  onTabPress,
+  interactive = true,
+}: {
+  tabs: Array<{ key: TabKey; icon: keyof typeof Ionicons.glyphMap }>;
+  activeTab: TabKey;
+  onTabPress?: (tab: TabKey) => void;
+  interactive?: boolean;
+}) {
+  const [tabLayouts, setTabLayouts] = useState<Record<string, { x: number; width: number }>>({});
+  const indicatorX = useRef(new Animated.Value(0)).current;
+  const indicatorWidth = useRef(new Animated.Value(0)).current;
+  const glowOpacity = useRef(new Animated.Value(0)).current;
+  const hasInitialized = useRef(false);
+
+  useEffect(() => {
+    const layout = tabLayouts[activeTab];
+    if (!layout) return;
+
+    if (!hasInitialized.current) {
+      // First render: set position immediately without animation
+      indicatorX.setValue(layout.x);
+      indicatorWidth.setValue(layout.width);
+      hasInitialized.current = true;
+      // Fade in the indicator
+      Animated.timing(glowOpacity, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: false,
+      }).start();
+      return;
+    }
+
+    // Animate the glass blob to the new position
+    Animated.parallel([
+      Animated.spring(indicatorX, {
+        toValue: layout.x,
+        damping: 18,
+        stiffness: 180,
+        mass: 0.8,
+        useNativeDriver: false,
+      }),
+      Animated.spring(indicatorWidth, {
+        toValue: layout.width,
+        damping: 18,
+        stiffness: 180,
+        mass: 0.8,
+        useNativeDriver: false,
+      }),
+    ]).start();
+  }, [activeTab, indicatorX, indicatorWidth, glowOpacity, tabLayouts]);
+
+  const pair = tabColorPairs[activeTab];
+
+  return (
+    <View style={styles.tabBar}>
+      {/* Bar glass inner border */}
+      <View pointerEvents="none" style={styles.tabBarGlassBorder} />
+      {/* Bar top shine reflection */}
+      <View pointerEvents="none" style={styles.tabBarGlassShine} />
+      {/* Liquid glass sliding indicator */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.liquidGlassIndicator,
+          {
+            left: indicatorX,
+            width: indicatorWidth,
+            opacity: glowOpacity,
+            backgroundColor: pair.bg,
+          },
+        ]}
+      >
+        {/* Inner glow layer */}
+        <View style={styles.liquidGlassInnerGlow} />
+        {/* Top shine reflection */}
+        <View style={styles.liquidGlassShine} />
+      </Animated.View>
+
+      {/* Tab buttons */}
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.key;
+        const color = isActive ? brand.black : brand.white;
+        const ButtonComponent = interactive ? Pressable : View;
+        return (
+          <ButtonComponent
+            key={tab.key}
+            style={[
+              styles.tabButton,
+              isActive && styles.tabButtonActive,
+            ]}
+            onLayout={(e: { nativeEvent: { layout: { x: number; width: number } } }) => {
+              const { x, width } = e.nativeEvent.layout;
+              setTabLayouts((prev) => {
+                if (prev[tab.key]?.x === x && prev[tab.key]?.width === width) return prev;
+                return { ...prev, [tab.key]: { x, width } };
+              });
+            }}
+            {...(interactive && onTabPress ? { onPress: () => onTabPress(tab.key) } : {})}
+          >
+            <View style={styles.tabIconBadge}>
+              <Ionicons name={tab.icon} size={17} color={color} />
+            </View>
+            <Text style={[styles.tabLabel, { color }]}>
+              {tab.key}
+            </Text>
+          </ButtonComponent>
+        );
+      })}
+    </View>
   );
 }
 
@@ -825,30 +985,11 @@ export default function App() {
             >
               <TalksScreen onOpenLive={openTalkDetail} />
               <SafeAreaView style={styles.tabBarSafeArea}>
-                <View style={styles.tabBar}>
-                  {tabs.map((tab) => {
-                    const isActive = tab.key === "Guests";
-                    const pair = tabColorPairs[tab.key];
-                    const color = isActive ? brand.black : brand.white;
-                    return (
-                      <View
-                        key={tab.key}
-                        style={[
-                          styles.tabButton,
-                          isActive && styles.tabButtonActive,
-                          isActive && { backgroundColor: pair.bg },
-                        ]}
-                      >
-                        <View style={[styles.tabIconBadge]}>
-                          <Ionicons name={tab.icon} size={17} color={color} />
-                        </View>
-                        <Text style={[styles.tabLabel, { color }]}>
-                          {tab.key}
-                        </Text>
-                      </View>
-                    );
-                  })}
-                </View>
+                <LiquidGlassTabBar
+                  tabs={tabs}
+                  activeTab="Guests"
+                  interactive={false}
+                />
               </SafeAreaView>
             </Animated.View>
             <Animated.View
@@ -872,31 +1013,11 @@ export default function App() {
               {tabScreen}
             </Animated.View>
             <SafeAreaView style={styles.tabBarSafeArea}>
-              <View style={styles.tabBar}>
-                {tabs.map((tab) => {
-                  const isActive = activeTab === tab.key;
-                  const pair = tabColorPairs[tab.key];
-                  const color = isActive ? brand.black : brand.white;
-                  return (
-                    <Pressable
-                      key={tab.key}
-                      style={[
-                        styles.tabButton,
-                        isActive && styles.tabButtonActive,
-                        isActive && { backgroundColor: pair.bg },
-                      ]}
-                      onPress={() => navigateToTab(tab.key)}
-                    >
-                      <View style={[styles.tabIconBadge]}>
-                        <Ionicons name={tab.icon} size={17} color={color} />
-                      </View>
-                      <Text style={[styles.tabLabel, { color }]}>
-                        {tab.key}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
+              <LiquidGlassTabBar
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabPress={navigateToTab}
+              />
             </SafeAreaView>
           </>
         )}
@@ -983,7 +1104,7 @@ function startLiveConsumer(onText: (text: string) => void): () => void {
       }
     }, 5000);
     // 🟢 FINE BLOCCO
-    
+
     socket.onopen = () => {
       console.log("[LiveWS] Connesso allo stream di traduzioni.");
 
@@ -1040,7 +1161,7 @@ function startLiveConsumer(onText: (text: string) => void): () => void {
       socket = null;
       if (flushTimer !== null) clearInterval(flushTimer);
       if (sessionCheckTimer !== null) clearInterval(sessionCheckTimer); // 👈 Puliamo il radar
-      
+
       if (!stopped) {
         reconnectTimer = setTimeout(connect, 5000);
       }
@@ -1437,13 +1558,13 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   tabBar: {
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.15)",
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderLeftColor: "rgba(255,255,255,0.1)",
-    borderRightColor: "rgba(255,255,255,0.1)",
-    backgroundColor: "rgba(0,0,0,0.75)",
+    overflow: "hidden" as const,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "rgba(0,0,0,0.35)",
+    // @ts-ignore — web-only backdropFilter
+    backdropFilter: "blur(24px)",
+    WebkitBackdropFilter: "blur(24px)",
     minHeight: 76,
     marginHorizontal: 14,
     marginBottom: 10,
@@ -1451,13 +1572,13 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     paddingTop: 8,
     paddingHorizontal: 8,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    justifyContent: "space-around" as const,
+    alignItems: "center" as const,
     shadowColor: "#000000",
-    shadowOpacity: 0.26,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 10 },
   },
   tabButton: {
     alignItems: "center",
@@ -1472,6 +1593,51 @@ const styles = StyleSheet.create({
   tabButtonActive: {
     paddingHorizontal: 22,
   },
+  tabBarGlassBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+    // subtle inner highlight on top edge
+    borderTopColor: "rgba(255,255,255,0.22)",
+  },
+  tabBarGlassShine: {
+    position: "absolute",
+    top: 0,
+    left: "15%",
+    right: "15%",
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderBottomLeftRadius: 999,
+    borderBottomRightRadius: 999,
+  },
+  liquidGlassIndicator: {
+    position: "absolute",
+    top: 6,
+    bottom: 6,
+    borderRadius: 18,
+    overflow: "hidden",
+    shadowColor: "#ffffff",
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 0 },
+  },
+  liquidGlassInnerGlow: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.35)",
+  },
+  liquidGlassShine: {
+    position: "absolute",
+    top: 0,
+    left: "10%",
+    right: "10%",
+    height: "45%",
+    borderBottomLeftRadius: 999,
+    borderBottomRightRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.18)",
+  },
   tabIconBadge: {
     width: 28,
     height: 28,
@@ -1479,4 +1645,62 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   tabLabel: { fontWeight: "900", fontSize: 12 },
+
+  infoPopupOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.60)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  infoPopupCard: {
+    width: "100%",
+    maxWidth: 380,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.30)",
+    backgroundColor: "rgba(30,20,45,0.92)",
+    padding: 22,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.45,
+    shadowRadius: 30,
+    shadowOffset: { width: 0, height: 12 },
+  },
+  infoPopupCardDesktop: {
+    maxWidth: 440,
+    padding: 30,
+  },
+  infoPopupTitle: {
+    color: brand.white,
+    fontSize: 22,
+    fontWeight: "900",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  infoPopupText: {
+    color: "rgba(255,255,255,0.88)",
+    fontSize: 13,
+    fontWeight: "600",
+    lineHeight: 19,
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  infoPopupButton: {
+    marginTop: 14,
+    borderRadius: 999,
+    backgroundColor: brand.peach,
+    paddingHorizontal: 40,
+    paddingVertical: 13,
+    shadowColor: brand.peach,
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  infoPopupButtonText: {
+    color: brand.black,
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 0.5,
+  },
 });
