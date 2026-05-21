@@ -65,7 +65,7 @@ const talks: Talk[] = [
       "Étoile e Primo Ballerino del corpo di ballo del Teatro dell’Opera di Roma ",
     time: "Artist",
     speakerBio:
-      "Alessandra Amato è Étoile del Teatro dell’Opera di Roma dal 2016, nominata in seguito ad uno spettacolo de Il lago dei cigni. Consolida negli anni la sua partnership con Claudio Cocino, Primo Ballerino del teatro dell’opera di Roma dal 2017, nominato in seguito al balletto La bella addormentata. Nelle loro carriere interpretano i ruoli principali nei più importanti balletti del repertorio classico e del repertorio dei maggiori coreografi del ‘900 e contemporanei. ",
+      "Alessandra Amato è Étoile del Teatro dell’Opera di Roma dal 2016, nominata in seguito ad uno spettacolo de Il lago dei cigni. Consolida negli anni la sua partnership con Claudio Cocino, Primo Ballerino del Teatro dell’Opera di Roma dal 2017, nominato in seguito al balletto La bella addormentata. Nelle loro carriere interpretano i ruoli principali nei più importanti balletti del repertorio classico e del repertorio dei maggiori coreografi del ‘900 e contemporanei. ",
   },
   {
     id: "5",
