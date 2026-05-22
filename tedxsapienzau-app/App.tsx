@@ -150,6 +150,7 @@ const sponsors: Sponsor[] = [
     logo: require("./assets/sponsors/RadioSapienza.png"),
   },
   { name: "Underpark Radio", logo: require("./assets/sponsors/UPR.png") },
+  { name: "Radio Unitelma", logo: require("./assets/sponsors/Unitelma.jpg") },
   { name: "Kortpress", logo: require("./assets/sponsors/Kortpress.png") },
   { name: "NAM", logo: require("./assets/sponsors/NAM.png") },
   { name: "Parlamento Europeo", logo: require("./assets/sponsors/PE.jpg") },
@@ -167,6 +168,7 @@ const sponsors: Sponsor[] = [
   { name: "Roma", logo: require("./assets/sponsors/Roma2.png") },
   { name: "Inps", logo: require("./assets/sponsors/INPS.jpg") },
   { name: "UNPLI", logo: require("./assets/sponsors/unpli.png") },
+  { name: "Sapienza", logo: require("./assets/sponsors/Sapienza.png") },
 ];
 
 type TabKey = "Guests" | "Sponsors" | "Live";
@@ -635,7 +637,7 @@ function LivePageScreen({
               Qui puoi seguire in tempo reale la traduzione di ciò che viene detto sul palco.
             </Text>
             <Text style={styles.infoPopupText}>
-              Il testo apparirà automaticamente e si aggiornerà ogni pochi secondi. Puoi rileggere il testo precedente scorrendo il testo.
+              Il testo apparirà automaticamente e si aggiornerà ogni pochi secondi. Puoi scorrere per rileggere ciò che è già stato mostrato.
             </Text>
             <Text style={styles.infoPopupText}>
               Resta su questa pagina per non perdere nulla!
@@ -747,7 +749,8 @@ function LiquidGlassTabBar({
               isActive && styles.tabButtonActive,
             ]}
             onLayout={(e: { nativeEvent: { layout: { x: number; width: number } } }) => {
-              const { x, width } = e.nativeEvent.layout;
+              const x = Math.round(e.nativeEvent.layout.x);
+              const width = Math.round(e.nativeEvent.layout.width);
               setTabLayouts((prev) => {
                 if (prev[tab.key]?.x === x && prev[tab.key]?.width === width) return prev;
                 return { ...prev, [tab.key]: { x, width } };
@@ -1561,10 +1564,9 @@ const styles = StyleSheet.create({
     overflow: "hidden" as const,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.12)",
-    backgroundColor: "rgba(0,0,0,0.35)",
-    // @ts-ignore — web-only backdropFilter
-    backdropFilter: "blur(24px)",
-    WebkitBackdropFilter: "blur(24px)",
+    backgroundColor: "rgba(0,0,0,0.75)",
+    // backdropFilter rimosso per migliorare le performance ed eliminare il lag
+
     minHeight: 76,
     marginHorizontal: 14,
     marginBottom: 10,
