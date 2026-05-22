@@ -666,49 +666,6 @@ function LiquidGlassTabBar({
   onTabPress?: (tab: TabKey) => void;
   interactive?: boolean;
 }) {
-  const [tabLayouts, setTabLayouts] = useState<Record<string, { x: number; width: number }>>({});
-  const indicatorX = useRef(new Animated.Value(0)).current;
-  const indicatorWidth = useRef(new Animated.Value(0)).current;
-  const glowOpacity = useRef(new Animated.Value(0)).current;
-  const hasInitialized = useRef(false);
-
-  useEffect(() => {
-    const layout = tabLayouts[activeTab];
-    if (!layout) return;
-
-    if (!hasInitialized.current) {
-      // First render: set position immediately without animation
-      indicatorX.setValue(layout.x);
-      indicatorWidth.setValue(layout.width);
-      hasInitialized.current = true;
-      // Fade in the indicator
-      Animated.timing(glowOpacity, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: false,
-      }).start();
-      return;
-    }
-
-    // Animate the glass blob to the new position
-    Animated.parallel([
-      Animated.spring(indicatorX, {
-        toValue: layout.x,
-        damping: 18,
-        stiffness: 180,
-        mass: 0.8,
-        useNativeDriver: false,
-      }),
-      Animated.spring(indicatorWidth, {
-        toValue: layout.width,
-        damping: 18,
-        stiffness: 180,
-        mass: 0.8,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  }, [activeTab, indicatorX, indicatorWidth, glowOpacity, tabLayouts]);
-
   const pair = tabColorPairs[activeTab];
 
   return (
@@ -717,24 +674,6 @@ function LiquidGlassTabBar({
       <View pointerEvents="none" style={styles.tabBarGlassBorder} />
       {/* Bar top shine reflection */}
       <View pointerEvents="none" style={styles.tabBarGlassShine} />
-      {/* Liquid glass sliding indicator */}
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          styles.liquidGlassIndicator,
-          {
-            left: indicatorX,
-            width: indicatorWidth,
-            opacity: glowOpacity,
-            backgroundColor: pair.bg,
-          },
-        ]}
-      >
-        {/* Inner glow layer */}
-        <View style={styles.liquidGlassInnerGlow} />
-        {/* Top shine reflection */}
-        <View style={styles.liquidGlassShine} />
-      </Animated.View>
 
       {/* Tab buttons */}
       {tabs.map((tab) => {
@@ -748,16 +687,26 @@ function LiquidGlassTabBar({
               styles.tabButton,
               isActive && styles.tabButtonActive,
             ]}
-            onLayout={(e: { nativeEvent: { layout: { x: number; width: number } } }) => {
-              const x = Math.round(e.nativeEvent.layout.x);
-              const width = Math.round(e.nativeEvent.layout.width);
-              setTabLayouts((prev) => {
-                if (prev[tab.key]?.x === x && prev[tab.key]?.width === width) return prev;
-                return { ...prev, [tab.key]: { x, width } };
-              });
-            }}
             {...(interactive && onTabPress ? { onPress: () => onTabPress(tab.key) } : {})}
           >
+            {isActive && (
+              <View
+                pointerEvents="none"
+                style={[
+                  styles.liquidGlassIndicator,
+                  {
+                    backgroundColor: pair.bg,
+                    ...StyleSheet.absoluteFillObject,
+                  },
+                ]}
+              >
+                {/* Inner glow layer */}
+                <View style={styles.liquidGlassInnerGlow} />
+                {/* Top shine reflection */}
+                <View style={styles.liquidGlassShine} />
+              </View>
+            )}
+
             <View style={styles.tabIconBadge}>
               <Ionicons name={tab.icon} size={17} color={color} />
             </View>
@@ -1564,9 +1513,10 @@ const styles = StyleSheet.create({
     overflow: "hidden" as const,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.12)",
-    backgroundColor: "rgba(0,0,0,0.75)",
-    // backdropFilter rimosso per migliorare le performance ed eliminare il lag
-
+    backgroundColor: "rgba(0,0,0,0.35)",
+    // @ts-ignore — web-only backdropFilter
+    backdropFilter: "blur(24px)",
+    WebkitBackdropFilter: "blur(24px)",
     minHeight: 76,
     marginHorizontal: 14,
     marginBottom: 10,
